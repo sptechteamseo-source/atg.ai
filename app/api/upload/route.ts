@@ -30,8 +30,8 @@ export async function POST(request: NextRequest) {
     const ext      = file.name.split('.').pop()?.toLowerCase() || 'jpg'
     const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
-    // ── Vercel Blob (production + any env with BLOB_READ_WRITE_TOKEN) ──────────
-    if (process.env.BLOB_READ_WRITE_TOKEN) {
+    // ── Vercel Blob (production via OIDC or any env with static token) ─────────
+    if (process.env.BLOB_READ_WRITE_TOKEN || process.env.VERCEL_OIDC_TOKEN) {
       const { put } = await import('@vercel/blob')
       const blob    = await put(filename, file, {
         access:      'public',
