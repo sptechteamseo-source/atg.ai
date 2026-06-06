@@ -1,5 +1,6 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { sendContactNotification } from '@/lib/email'
 import { z } from 'zod'
 
 const contactSchema = z.object({
@@ -26,6 +27,14 @@ export async function POST(request: NextRequest) {
     const submission = await prisma.contactsubmission.create({
       data: parsed.data,
     })
+
+    // Send notification email — runs after DB save so a mail failure never
+    // loses the submission. Errors are caught & logged inside the helper.
+    try {
+      await sendContactNotification(parsed.data, submission.id)
+    } catch (emailError) {
+      console.error('[POST /api/contact] Unexpected email error:', emailError)
+    }
 
     return Response.json({ success: true, data: { id: submission.id } }, { status: 201 })
   } catch (error) {
