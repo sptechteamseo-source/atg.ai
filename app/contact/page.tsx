@@ -57,9 +57,32 @@ export default function ContactPage() {
     }
 
     try {
+      // 1 ── Save to database (server-side validation + persistence)
       const res  = await fetch('/api/contact', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       const data = await res.json()
       if (!data.success) { setErrMsg(data.error || 'Something went wrong'); setStatus('error'); return }
+
+      // 2 ── Send email via Web3Forms (must be client-side — free plan restriction)
+      //      Fire-and-forget: a mail failure never blocks the success screen.
+      fetch('https://api.web3forms.com/submit', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          access_key: 'f569a71c-1303-4423-b424-fcd29998de99',
+          subject:    'New Contact Form Submission - AskTheGenie',
+          from_name:  'AskTheGenie Contact Form',
+          replyto:    body.email,
+          botcheck:   false,
+          Name:       body.name,
+          Email:      body.email,
+          ...(body.company  && { Company:    body.company  }),
+          ...(body.role     && { Role:       body.role     }),
+          ...(body.teamsize && { 'Team Size': body.teamsize }),
+          Message:    body.message,
+          'Submission ID': data.data?.id ?? '',
+        }),
+      }).catch(err => console.warn('[web3forms]', err))
+
       setStatus('success')
       formRef.current?.reset()
     } catch {
