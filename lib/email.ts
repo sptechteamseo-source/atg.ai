@@ -1,6 +1,12 @@
 import { Resend } from 'resend'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Lazy singleton — only instantiated at runtime when an email is actually sent,
+// never at build time (avoids "Missing API key" error during next build).
+let _resend: Resend | null = null
+function getResend(): Resend {
+  if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY)
+  return _resend
+}
 
 const SUPPORT_EMAIL = 'Support@askthegenie.ai'
 
@@ -113,7 +119,7 @@ export async function sendContactNotification(
 
   const submittedAt = new Date().toUTCString()
 
-  const { error } = await resend.emails.send({
+  const { error } = await getResend().emails.send({
     from:    'AskTheGenie Contact <noreply@askthegenie.ai>',
     to:      [SUPPORT_EMAIL],
     replyTo: data.email,
