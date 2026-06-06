@@ -64,7 +64,8 @@ export default function Nav({ basePath = '' }: NavProps) {
   const [scrolled,  setScrolled]  = useState(false)
   const [menuOpen,  setMenuOpen]  = useState(false)
   const [ddOpen,    setDdOpen]    = useState(false)
-  const ddRef = useRef<HTMLDivElement>(null)
+  const ddRef       = useRef<HTMLDivElement>(null)
+  const closeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Scroll border effect
   useEffect(() => {
@@ -103,7 +104,20 @@ export default function Nav({ basePath = '' }: NavProps) {
     return () => { document.body.style.overflow = '' }
   }, [menuOpen])
 
+  // Clean up the close timer on unmount so it never fires after the component is gone
+  useEffect(() => () => { if (closeTimer.current) clearTimeout(closeTimer.current) }, [])
+
   function closeMenu() { setMenuOpen(false) }
+
+  // Dropdown open/close with a 150 ms grace period on leave so the cursor
+  // can travel across the 8 px gap without the menu vanishing mid-flight.
+  function handleDdEnter() {
+    if (closeTimer.current) { clearTimeout(closeTimer.current); closeTimer.current = null }
+    setDdOpen(true)
+  }
+  function handleDdLeave() {
+    closeTimer.current = setTimeout(() => setDdOpen(false), 150)
+  }
 
   const allNavLinks = [...NAV_LINKS, ...EXTRA_LINKS]
 
@@ -153,6 +167,21 @@ export default function Nav({ basePath = '' }: NavProps) {
 
         /* ── Use-cases dropdown ────────────────────────── */
         .nav-dd { position: relative; }
+
+        /*
+         * FIX: invisible bridge that fills the 8 px gap between the trigger
+         * button and the dropdown panel.  Without this the cursor briefly
+         * leaves .nav-dd while crossing the gap, firing onMouseLeave and
+         * collapsing the menu before it can be reached.
+         * The ::after height must equal the top offset used on .nav-dd-menu.
+         */
+        .nav-dd::after {
+          content: '';
+          position: absolute;
+          top: 100%;
+          left: 0; right: 0;
+          height: 8px; /* matches calc(100% + 8px) offset on .nav-dd-menu */
+        }
         .nav-dd-toggle {
           display: inline-flex; align-items: center; gap: 5px;
           padding: 8px 11px;
@@ -329,8 +358,8 @@ export default function Nav({ basePath = '' }: NavProps) {
             <div
               className="nav-dd"
               ref={ddRef}
-              onMouseEnter={() => setDdOpen(true)}
-              onMouseLeave={() => setDdOpen(false)}
+              onMouseEnter={handleDdEnter}
+              onMouseLeave={handleDdLeave}
             >
               <button
                 className="nav-dd-toggle"
