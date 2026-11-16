@@ -3,7 +3,7 @@
  * Run with: npx prisma db seed
  *
  * Creates:
- * - 1 admin user (admin@askgenie.ai / Admin@1234)
+ * - 1 admin user (admin@askClarant.ai / Admin@1234)
  * - 1 editor user
  * - 1 author user
  * - 3 blog categories
@@ -27,33 +27,33 @@ async function main() {
   const authorPassword = await bcrypt.hash('Author@1234', 12)
 
   const admin = await prisma.users.upsert({
-    where: { email: 'admin@askgenie.ai' },
+    where: { email: 'admin@askClarant.ai' },
     update: {},
     create: {
       name: 'Admin User',
-      email: 'admin@askgenie.ai',
+      email: 'admin@askClarant.ai',
       password: adminPassword,
       role: 'admin',
     },
   })
 
   const editor = await prisma.users.upsert({
-    where: { email: 'editor@askgenie.ai' },
+    where: { email: 'editor@askClarant.ai' },
     update: {},
     create: {
       name: 'Jordan Reyes',
-      email: 'editor@askgenie.ai',
+      email: 'editor@askClarant.ai',
       password: editorPassword,
       role: 'editor',
     },
   })
 
   const author = await prisma.users.upsert({
-    where: { email: 'author@askgenie.ai' },
+    where: { email: 'author@askClarant.ai' },
     update: {},
     create: {
       name: 'Priya Shah',
-      email: 'author@askgenie.ai',
+      email: 'author@askClarant.ai',
       password: authorPassword,
       role: 'author',
     },
@@ -225,7 +225,7 @@ Each answer takes 90 seconds to rate. We use a panel of 3 reviewers and take the
       excerpt: 'Revenue teams save 40 minutes per deal by surfacing CRM context instantly.',
       content: `# Revenue Operations
 
-Sales reps spend more time searching for context than actually selling. With askgenie.ai, all deal context — emails, Slack threads, Salesforce notes, Notion docs — surfaces in one answer.
+Sales reps spend more time searching for context than actually selling. With askClarant.ai, all deal context — emails, Slack threads, Salesforce notes, Notion docs — surfaces in one answer.
 
 ## The problem
 
@@ -235,11 +235,11 @@ A rep preparing for a call with a key account needs to:
 - Find the product spec they sent last quarter
 - Check if there were any support tickets
 
-This takes 30-40 minutes. With askgenie.ai, it takes 30 seconds.
+This takes 30-40 minutes. With askClarant.ai, it takes 30 seconds.
 
 ## The result
 
-Teams using askgenie.ai for deal prep report:
+Teams using askClarant.ai for deal prep report:
 - 40 minutes saved per deal cycle
 - 28% faster time to first meeting
 - Better prep quality`,
@@ -262,7 +262,7 @@ Teams using askgenie.ai for deal prep report:
       excerpt: 'CS teams close tickets 60% faster by surfacing resolutions from past support history.',
       content: `# Customer Success
 
-Every support ticket is a chance to build institutional memory. With askgenie.ai, the knowledge from every resolved ticket becomes available to the whole team instantly.
+Every support ticket is a chance to build institutional memory. With askClarant.ai, the knowledge from every resolved ticket becomes available to the whole team instantly.
 
 ## The problem
 
@@ -270,7 +270,7 @@ When a new CS rep joins, they spend weeks learning. When a senior rep leaves, th
 
 ## The solution
 
-askgenie.ai connects to your support system, documentation, and Slack. When a new ticket arrives, it automatically surfaces:
+askClarant.ai connects to your support system, documentation, and Slack. When a new ticket arrives, it automatically surfaces:
 - How similar issues were resolved in the past
 - Relevant documentation sections
 - Slack conversations where the fix was discussed
@@ -289,6 +289,43 @@ askgenie.ai connects to your support system, documentation, and Slack. When a ne
     },
   })
 
+  await prisma.usecase.upsert({
+    where: { slug: 'students' },
+    update: {},
+    create: {
+      title: 'Students',
+      slug: 'students',
+      persona: 'Research',
+      excerpt: 'Students get cited answers from their reading lists, lecture notes and papers — in seconds, not hours.',
+      content: `# Students
+
+Students spend hours hunting through PDFs, lecture slides and reading lists to find one fact. With askClarant.ai, any question about their coursework is answered instantly — with the exact source cited so they can verify and cite it themselves.
+
+## The problem
+
+A student preparing for an exam or writing an essay needs to:
+- Search dozens of PDFs for a specific argument
+- Cross-reference lecture notes with assigned readings
+- Find the original source behind a claim
+- Summarise a paper in minutes, not hours
+
+This can take a whole evening. With askClarant.ai, it takes seconds.
+
+## The result
+
+Students using askClarant.ai report:
+- 3× faster essay research
+- Better-quality citations from primary sources
+- More time for deep reading instead of hunting`,
+      metric: '3× faster research',
+      industry: 'Media',
+      teamtype: 'Research',
+      status: 'published',
+      publishedat: new Date(),
+      authorid: admin.id,
+    },
+  })
+
   console.log('✅ Created use cases')
 
   // ─── Testimonials ──────────────────────────────────────────────────────────
@@ -298,7 +335,7 @@ askgenie.ai connects to your support system, documentation, and Slack. When a ne
   const testimonialData = [
     {
       quote:
-        'askgenie.ai changed how our revenue team prepares for meetings. What used to take 40 minutes now takes under a minute. Every rep feels like they have a personal research assistant.',
+        'askClarant.ai changed how our revenue team prepares for meetings. What used to take 40 minutes now takes under a minute. Every rep feels like they have a personal research assistant.',
       authorname: 'Sarah Chen',
       authorrole: 'Head of RevOps',
       company: 'Lattice',
@@ -343,9 +380,9 @@ askgenie.ai connects to your support system, documentation, and Slack. When a ne
   console.log('✅ Created testimonials')
   console.log('')
   console.log('🎉 Seed complete! Login credentials:')
-  console.log('   Admin:  admin@askgenie.ai  /  Admin@1234')
-  console.log('   Editor: editor@askgenie.ai /  Editor@1234')
-  console.log('   Author: author@askgenie.ai /  Author@1234')
+  console.log('   Admin:  admin@askClarant.ai  /  Admin@1234')
+  console.log('   Editor: editor@askClarant.ai /  Editor@1234')
+  console.log('   Author: author@askClarant.ai /  Author@1234')
 }
 
 main()

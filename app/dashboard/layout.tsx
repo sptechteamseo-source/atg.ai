@@ -1,8 +1,14 @@
 import type { ReactNode } from 'react'
+import type { Metadata } from 'next'
 import { auth } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import Sidebar from '@/components/dashboard/Sidebar'
 import type { UserRole } from '@/types'
+
+// The dashboard is private — never index it, on any environment.
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 // Protect the entire dashboard — redirect to login if not authenticated
 export default async function DashboardLayout({ children }: { children: ReactNode }) {

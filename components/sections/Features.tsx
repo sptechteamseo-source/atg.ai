@@ -1,59 +1,52 @@
-import { Icons } from '@/components/icons/Icons'
-import { FEATURES } from '@/lib/data'
+/* "The Problem" — ported directly from the reference design: a two-column layout
+   (heading left, two paragraphs right; the second with a top rule). Colors mapped
+   to the site's tokens so it renders in both themes; fonts + section spacing are
+   the site's. id="features" preserved for the footer anchor. */
 
 export default function Features() {
   return (
     <>
       <style>{`
-        .features-head { display: flex; flex-direction: column; gap: 8px; margin-bottom: 56px; }
-        @media (max-width: 640px) {
-          .features-head { margin-bottom: 28px; }
-          .feature { padding: 20px 18px 22px; min-height: auto; }
+        .problem-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+          gap: clamp(32px, 6vw, 96px); align-items: start;
         }
-        .features-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        @media (max-width: 1040px) { .features-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 640px)  { .features-grid { grid-template-columns: 1fr; } }
-        .feature { padding: 28px 26px 30px; display: flex; flex-direction: column; min-height: 240px; }
-        .feature-icon {
-          width: 38px; height: 38px; border-radius: 10px;
-          background: var(--accent-soft); color: var(--accent);
-          display: inline-flex; align-items: center; justify-content: center;
+        .problem-eyebrow {
+          font-family: var(--font-label); font-size: 13px; font-weight: 600;
+          letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent);
           margin-bottom: 18px;
-          border: 1px solid color-mix(in oklab, var(--accent) 25%, transparent);
-          transition: transform .3s var(--ease), background .25s, box-shadow .3s;
         }
-        .feature:hover .feature-icon {
-          transform: scale(1.15) rotate(-8deg);
-          background: var(--accent);
-          color: var(--accent-fg);
-          box-shadow: 0 8px 20px -6px var(--accent-glow);
+        .problem-h {
+          font-family: var(--font-display); font-weight: 700;
+          font-size: clamp(30px, 3.6vw, 46px); line-height: 1.08;
+          letter-spacing: -0.03em; color: var(--fg); text-wrap: balance;
         }
-        .feature-title { font-family: var(--font-display); font-weight: 600; font-size: 19px; letter-spacing: -0.01em; color: var(--fg); margin-bottom: 8px; transition: color .2s; }
-        .feature:hover .feature-title { color: var(--accent); }
-        .feature-body { color: var(--fg-muted); font-size: 14.5px; line-height: 1.55; text-wrap: pretty; }
+        .problem-body { display: flex; flex-direction: column; gap: 22px; padding-top: 6px; }
+        .problem-p1 { font-size: 17px; line-height: 1.7; color: var(--fg-muted); text-wrap: pretty; }
+        .problem-p2 {
+          font-size: 19px; line-height: 1.6; color: var(--fg); font-weight: 500;
+          padding-top: 22px; border-top: 1px solid var(--border); text-wrap: pretty;
+          font-family: var(--font-display);
+        }
       `}</style>
 
-      <section id="features" className="features">
-        <div className="container">
-          <div className="features-head" data-reveal="fade-up">
-            <span className="eyebrow">Why teams switch</span>
-            <h2 className="section-title">
-              Not another chat box.<br />
-              A retrieval engine your team can <em>trust</em>.
-            </h2>
+      <section id="features" className="problem">
+        <div className="container problem-grid">
+          <div>
+            <div className="problem-eyebrow">The problem</div>
+            <h2 className="problem-h">Your Business Has the Answers. <span style={{ color: '#30b4e6' }}>Finding Them Takes Time.</span></h2>
           </div>
-
-          <div className="features-grid">
-            {FEATURES.map((f, i) => {
-              const Icon = Icons[f.icon]
-              return (
-                <div key={i} className="feature card" data-reveal="pop" style={{'--reveal-delay':`${i*55}ms`} as any}>
-                  {Icon && <div className="feature-icon"><Icon size={20} /></div>}
-                  <h3 className="feature-title">{f.title}</h3>
-                  <p className="feature-body">{f.body}</p>
-                </div>
-              )
-            })}
+          <div className="problem-body">
+            <p className="problem-p1">
+              Important information lives across emails, documents, team conversations, and
+              business applications. Finding the right details often means switching between
+              tools, asking colleagues, and piecing information together manually.
+            </p>
+            <p className="problem-p2">
+              Clarant works as an AI assistant for business, helping your team spend less time
+              searching and more time getting work done without searching through every application.
+            </p>
           </div>
         </div>
       </section>

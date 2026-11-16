@@ -1,7 +1,7 @@
 // ─── Shared types used across the app ────────────────────────────────────────
 
 export type UserRole = 'admin' | 'editor' | 'author'
-export type ContentStatus = 'draft' | 'published' | 'archived'
+export type ContentStatus = 'draft' | 'scheduled' | 'published' | 'archived'
 
 // Extend NextAuth session to include role and id
 declare module 'next-auth' {
@@ -131,10 +131,13 @@ export interface SerializedBlog {
   slug: string
   excerpt: string | null
   content: string
+  authorname: string | null
   coverimage: string | null
   ogimage: string | null
+  imagealt: string | null
   seotitle: string | null
   seodescription: string | null
+  schemamarkup: string | null
   faq: FaqItem[]
   tag: string | null
   status: string
@@ -156,4 +159,12 @@ export interface RelatedPost {
   coverimage: string | null
   readmin: number
   author: { name: string }
+}
+
+// Adjacent (previous/next) post for blog detail navigation.
+export interface AdjacentPost {
+  title: string
+  slug: string
+  coverimage: string | null
+  publishedat: string | null
 }

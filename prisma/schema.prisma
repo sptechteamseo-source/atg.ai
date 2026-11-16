@@ -2,6 +2,10 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// DATABASE_URL is read by the Prisma CLI (prisma generate, db push, studio).
+// At *runtime* the app resolves the connection via lib/prisma.ts which reads
+// process.env.MONGODB_URI first, then falls back to DATABASE_URL.
+// Set MONGODB_URI in Vercel environment variables for production deployments.
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
@@ -11,20 +15,58 @@ model users {
   id               String    @id @default(cuid()) @map("_id")
   name             String
   email            String    @unique
-  password         String
+  // Optional: credential users have a bcrypt hash; Microsoft Entra ID users have
+  // none (we never store Microsoft passwords). Missing on Entra-only accounts.
+  password         String?
+  // Microsoft Entra ID link. microsoftId is the stable `oid` claim (the identity
+  // key, not email); tenantId is the `tid`. Both null until the user first signs
+  // in with Microsoft. See lib/auth.ts signIn callback.
+  microsoftId      String?   @unique
+  tenantId         String?
   role             role      @default(author)
+  // Account status — "active" users can sign in; "inactive" are blocked at login.
+  // Optional so pre-existing user documents (which lack the field) read as null
+  // and are treated as active; new users default to "active".
+  status           String?   @default("active")
   image            String?
   // Author profile fields — editable from dashboard /profile
   bio              String?
   jobtitle         String?
   twitter          String?
   linkedin         String?
-  resettoken       String?
-  resettokenexpiry DateTime?
+  // Brute-force protection (see lib/auth.ts authorize + lib/login-security.ts).
+  // Optional so pre-existing docs read as null → treated as 0 attempts / unlocked.
+  failedLoginAttempts Int?      @default(0)
+  lastFailedLogin     DateTime?
+  lockUntil           DateTime?
+  // Google-Authenticator TOTP 2FA (see lib/twofactor.ts). Secret + hashed backup
+  // codes are only present once 2FA is set up; enabled flips true after the first
+  // verified code. Optional so pre-existing docs read as null → 2FA off.
+  twoFactorEnabled     Boolean?  @default(false)
+  twoFactorSecret      String?
+  twoFactorBackupCodes String[]
   createdat        DateTime  @default(now())
   updatedat        DateTime  @updatedAt
   blogs            blog[]
   usecases         usecase[]
+}
+
+// Auth audit trail — login attempts (success/fail) and account changes
+// (password/username). Written by lib/login-security.ts#logAuth. Also the
+// source for per-IP rate limiting (count of recent "login" events by ip).
+model authlog {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  event     String   // "login" | "password_change" | "username_change"
+  email     String?  // attempted email (may not match a user)
+  userId    String?  // set when a user matched
+  success   Boolean  @default(true)
+  reason    String?  // "ok" | "bad_password" | "locked" | "rate_limited" | "inactive" | "no_user"
+  ip        String?
+  userAgent String?
+  createdat DateTime @default(now())
+
+  @@index([ip, createdat])   // per-IP rate-limit window query
+  @@index([userId, createdat])
 }
 
 model blog {
@@ -34,16 +76,28 @@ model blog {
   excerpt        String?
   content        String
   coverimage     String?
+  // Display byline shown on the blog detail page (may differ from the
+  // logged-in author who owns the record via the `author` relation).
+  authorname     String?
   // SEO & Open Graph — editable from dashboard blog form
   ogimage        String?
+  // alt text for the featured/cover image (SEO + accessibility)
+  imagealt       String?
   seotitle       String?
   seodescription String?
+  // Optional custom JSON-LD injected into the page <head> as
+  // <script type="application/ld+json">
+  schemamarkup   String?
   // FAQ — stored as JSON array [{q, a}]
   faq            Json?
   tag            String?
   status         status        @default(draft)
   readmin        Int           @default(5)
   publishedat    DateTime?
+  // Scheduler — set when status = scheduled; stored in UTC, cleared on cancel.
+  scheduledat    DateTime?
+  // Soft delete — null = live, a timestamp = in Trash. Missing on old docs → null.
+  deletedat      DateTime?
   createdat      DateTime      @default(now())
   updatedat      DateTime      @updatedAt
   authorid       String
@@ -116,13 +170,25 @@ model contactsubmission {
   id        String   @id @default(cuid()) @map("_id")
   name      String
   email     String
-  company   String?
-  role      String?
-  teamsize  String?
-  message   String
+  company   String
+  phone     String?
   status    String   @default("new") // new | read | replied | archived
   createdat DateTime @default(now())
   updatedat DateTime @updatedAt
+}
+
+// 301 redirect rules managed from the dashboard and applied by middleware.ts.
+// sourceUrl is a normalised path ("/old-page"); targetUrl is a path or absolute URL.
+model Redirect {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  sourceUrl String   @unique
+  targetUrl String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Middleware fetches only enabled rules — index the filter it uses.
+  @@index([enabled])
 }
 
 enum role {
@@ -133,6 +199,7 @@ enum role {
 
 enum status {
   draft
+  scheduled
   published
   archived
 }

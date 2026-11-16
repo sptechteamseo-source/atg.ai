@@ -2,7 +2,7 @@
 
 /* ===== Blog header ===== */
 .blog-hero {
-  padding: clamp(72px, 9vw, 128px) 0 clamp(48px, 6vw, 80px);
+  padding: var(--section-pad-y-lg) 0 var(--section-pad-y-sm);
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--border);
@@ -117,7 +117,7 @@
 }
 
 /* ===== Featured post ===== */
-.blog-section { padding: clamp(48px, 6vw, 80px) 0; }
+.blog-section { padding: var(--section-pad-y-sm) 0; }
 .blog-eyebrow-row {
   display: flex; align-items: baseline; justify-content: space-between;
   margin-bottom: 28px; gap: 16px; flex-wrap: wrap;
@@ -141,7 +141,7 @@
   position: relative;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  aspect-ratio: 4 / 3;
+  
   background: var(--bg-elevated);
   border: 1px solid var(--border);
   text-decoration: none;
@@ -517,7 +517,7 @@
 
 /* ===== Post hero v2 ===== */
 .post2-hero {
-  padding: clamp(56px, 7vw, 96px) 0 0;
+  padding: var(--section-pad-y) 0 0;
   position: relative;
 }
 .post2-bg {
@@ -547,6 +547,7 @@
 .post2-crumb a:hover { color: var(--fg); opacity: 1; }
 .post2-crumb .sep { opacity: .5; }
 .post2-category {
+  margin-left:10px;
   display: inline-flex; align-items: center; gap: 8px;
   padding: 6px 14px;
   border-radius: 9999px;
@@ -589,13 +590,19 @@
 .post2-cover {
   margin: clamp(40px, 5vw, 64px) auto 0;
   max-width: 1080px;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 9;            /* reserves space for the placeholder (no-image) state */
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
   overflow: hidden;
   position: relative;
   background: var(--bg-elevated);
   box-shadow: 0 40px 80px -40px color-mix(in oklab, var(--accent) 20%, transparent);
+}
+/* When a real cover image exists, let the container take the image's natural
+   aspect ratio — no 16/9 box to crop into, no letterboxing. */
+.post2-cover.has-img {
+  aspect-ratio: auto;
+  background: var(--bg);
 }
 .post2-cover .ph {
   position: absolute; inset: 0;
@@ -620,7 +627,7 @@
   display: grid;
   grid-template-columns: 260px minmax(0, 720px) 1fr;
   gap: clamp(32px, 4vw, 56px);
-  padding: clamp(48px, 6vw, 80px) 0;
+  padding: var(--section-pad-y-sm) 0;
   align-items: start;
 }
 @media (max-width: 1080px) { .post2-body { grid-template-columns: 1fr; max-width: 720px; margin: 0 auto; } }
@@ -710,16 +717,6 @@
   max-width: 720px;
 }
 .prose2 > * + * { margin-top: 24px; }
-.prose2 p:first-child::first-letter {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 64px;
-  line-height: 0.9;
-  float: left;
-  padding: 8px 14px 0 0;
-  color: var(--accent);
-  letter-spacing: -0.03em;
-}
 .prose2 p { color: var(--fg); }
 .prose2 a {
   color: var(--accent);
@@ -728,12 +725,17 @@
   text-decoration-thickness: 1px;
 }
 .prose2 strong { color: var(--fg); font-weight: 600; }
+/* Hide the duplicate article title that the CMS content leads with — it
+   renders as a bare <h1> at the global --text-6xl size and repeats the
+   styled .post2-title above. Scoped to .post2-body so only the blog detail
+   page is affected (the customer case-study pages also use .prose2). */
+.post2-body .prose2 h1 { display: none; }
 .prose2 h2 {
   font-family: var(--font-display);
   font-size: clamp(26px, 2.6vw, 34px);
   font-weight: 600;
   letter-spacing: -0.02em;
-  margin-top: 64px;
+  margin-top: 30px;
   scroll-margin-top: 100px;
   line-height: 1.15;
 }
@@ -752,8 +754,11 @@
   margin-top: 40px;
   scroll-margin-top: 100px;
 }
+/* Tailwind Preflight resets list-style to none — restore markers explicitly. */
 .prose2 ul, .prose2 ol { padding-left: 24px; }
-.prose2 li { margin-top: 10px; }
+.prose2 ul { list-style-type: disc; }
+.prose2 ol { list-style-type: decimal; }
+.prose2 li { margin-top: 10px; display: list-item; }
 .prose2 ul li::marker { color: var(--accent); }
 .prose2 ol li::marker { color: var(--accent); font-weight: 600; }
 .prose2 blockquote {
@@ -789,6 +794,48 @@
   border: 1px solid var(--border);
   border-radius: 5px;
 }
+/* Code blocks (<pre><code>): the editor escapes their contents, so authored
+   HTML shows as source rather than rendering — the intended distinction from
+   normal content. Reset the inline-code chrome for code that lives in a pre. */
+.prose2 pre {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.6;
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 18px 20px;
+  margin: 28px 0;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 2;
+}
+.prose2 pre code {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  border-radius: 0;
+}
+/* Tables — Preflight strips borders; restore a clean CMS table look. */
+.prose2 table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 28px 0;
+  font-size: 15px;
+  display: block;
+  overflow-x: auto;
+}
+.prose2 th, .prose2 td {
+  border: 1px solid var(--border);
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+}
+.prose2 th { background: var(--bg-sunken); font-weight: 600; color: var(--fg); }
+.prose2 td { color: var(--fg-muted); }
+/* Embedded iframes (YouTube etc.) authored via HTML source mode — keep responsive. */
+.prose2 iframe { max-width: 100%; border: 0; border-radius: var(--radius-md); margin: 28px 0; }
 .prose2 hr { border: 0; height: 1px; background: var(--border); margin: 56px 0; }
 .prose2 figure {
   margin: 40px 0;
@@ -1131,8 +1178,73 @@
 /* Related articles */
 .related {
   border-top: 1px solid var(--border);
-  padding-top: clamp(48px, 6vw, 80px);
-  margin-top: clamp(48px, 6vw, 80px);
+  padding-top: var(--section-pad-y-sm);
+  margin-top: var(--section-pad-y-sm);
+}
+
+/* ===== Previous / Next post navigation ===== */
+/* Sits directly below the author card, inside the article content column, so it
+   inherits the same content width. Compact, equal-height cards — no thumbnails. */
+.post-nav {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: stretch;   /* equal-height cards regardless of title length */
+}
+.post-nav-card,
+.prose2 .post-nav-card {  /* .prose2 prefix overrides the prose link color/underline */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  min-height: 104px;
+  padding: 22px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color .2s var(--ease), transform .2s var(--ease), box-shadow .2s var(--ease);
+}
+.post-nav-card.is-next { text-align: right; align-items: flex-end; }
+.post-nav-card:hover {
+  border-color: color-mix(in oklab, var(--accent) 45%, transparent);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px -14px color-mix(in oklab, var(--accent) 25%, transparent);
+}
+.post-nav-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-label);
+  font-size: 11.5px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+}
+.post-nav-arrow {
+  flex-shrink: 0;
+  transition: transform .2s var(--ease);
+}
+.post-nav-card.is-prev:hover .post-nav-arrow { transform: translateX(-3px); }
+.post-nav-card.is-next:hover .post-nav-arrow { transform: translateX(3px); }
+.post-nav-title {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  /* Clamp to two lines so long titles never blow out the compact height */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.post-nav-card:hover .post-nav-title { color: var(--accent); }
+@media (max-width: 640px) {
+  .post-nav { grid-template-columns: 1fr; }
+  .post-nav-card.is-next { text-align: left; align-items: flex-start; }
 }
 
 /* ===== Post body — no-TOC variant ===== */
@@ -1152,8 +1264,9 @@
 /* ===== Blog post image styles ===== */
 /* Cover image — fills the .post2-cover container */
 .post2-cover-img {
-  width: 100%; height: 100%;
-  object-fit: cover; display: block;
+  width: 100%;        /* fluid — fills the container width responsively */
+  height: auto;       /* preserves the image's native aspect ratio: no crop, stretch or distortion */
+  display: block;
   border-radius: inherit;
 }
 /* Author byline avatar (profile photo in hero) */
@@ -1176,7 +1289,6 @@
   .post-card-body { padding: 16px; }
   .blog-section { padding: 32px 0; }
   .prose2 { font-size: 16px; }
-  .prose2 p:first-child::first-letter { font-size: 52px; }
   .pull-quote { margin: 32px 0; padding: 24px; }
   .takeaways { padding: 20px; }
 }

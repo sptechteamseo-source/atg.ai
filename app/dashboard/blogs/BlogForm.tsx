@@ -2,6 +2,8 @@
 
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import RichTextEditor from './RichTextEditor'
+import { zonedToUtc, utcToZonedParts, TIMEZONES, DEFAULT_TZ } from '@/lib/schedule'
 
 interface Category {
   id: string
@@ -14,6 +16,19 @@ interface FaqItem {
   a: string
 }
 
+const AUTHORS = [
+  'Akshay Parashar',
+  'Dhwaja Jain',
+  'Monika Chandlani',
+  'Rekha Bodke',
+  'Roshan Gupta',
+  'Shailly Sharma',
+  'Suraj Shinde',
+  'Tushar Kumar',
+  'Vikash Jain',
+  'Jyoti Maurya',
+]
+
 interface BlogFormProps {
   initialData?: {
     id: string
@@ -21,13 +36,17 @@ interface BlogFormProps {
     slug: string
     excerpt: string | null
     content: string
+    authorname: string | null
     coverimage: string | null
     ogimage: string | null
+    imagealt: string | null
     seotitle: string | null
     seodescription: string | null
+    schemamarkup: string | null
     faq: FaqItem[] | null
     tag: string | null
     status: string
+    scheduledat: string | null
     readmin: number
     categoryid: string | null
   }
@@ -57,6 +76,17 @@ export default function BlogForm({ initialData, categories }: BlogFormProps) {
 
   // ── FAQ state ──
   const [faqItems, setFaqItems] = useState<FaqItem[]>(initialData?.faq || [])
+
+  // ── Rich content (WYSIWYG → clean semantic HTML) ──
+  const [content, setContent] = useState(initialData?.content || '')
+
+  // ── Scheduler state ──
+  // Pre-fill the date/time inputs from the stored UTC instant, shown in IST.
+  const initSched = initialData?.scheduledat ? utcToZonedParts(initialData.scheduledat, DEFAULT_TZ) : null
+  const [status, setStatus]       = useState(initialData?.status ?? 'draft')
+  const [schedDate, setSchedDate] = useState(initSched?.date ?? '')
+  const [schedTime, setSchedTime] = useState(initSched?.time ?? '')
+  const [schedTz, setSchedTz]     = useState(DEFAULT_TZ)
 
   // Auto-generate slug from title
   function generateSlug(title: string) {
@@ -117,6 +147,32 @@ export default function BlogForm({ initialData, categories }: BlogFormProps) {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError('')
+
+    // Content lives in React state (rich editor), not FormData. Treat it as
+    // present if it has visible text OR any embedded/media element (an image,
+    // table, iframe, etc. authored via HTML source mode has no text of its own).
+    const hasText  = content.replace(/<[^>]*>/g, '').trim().length > 0
+    const hasEmbed = /<(img|iframe|table|video|audio|embed|object|hr|blockquote|figure)\b/i.test(content)
+    if (!hasText && !hasEmbed) {
+      setError('Content is required')
+      return
+    }
+
+    // ── Scheduling: build the UTC instant and reject past times client-side ──
+    let scheduledat: string | null = null
+    if (status === 'scheduled') {
+      if (!schedDate || !schedTime) {
+        setError('Please select a schedule date and time.')
+        return
+      }
+      const when = zonedToUtc(schedDate, schedTime, schedTz)
+      if (when.getTime() <= Date.now()) {
+        setError('Please select a future date and time.')
+        return
+      }
+      scheduledat = when.toISOString()
+    }
+
     setLoading(true)
 
     const fd = new FormData(e.currentTarget)
@@ -128,15 +184,19 @@ export default function BlogForm({ initialData, categories }: BlogFormProps) {
       title:          text('title')!,
       slug:           text('slug')!,
       excerpt:        text('excerpt'),
-      content:        text('content')!,
+      content:        content,
+      authorname:     text('authorname')!,
       coverimage:     coverImage  || null,
       ogimage:        ogImage     || null,
+      imagealt:       text('imagealt')!,
       seotitle:       text('seotitle'),
       seodescription: text('seodescription'),
+      schemamarkup:   text('schemamarkup'),
       // Only include FAQ items that have a non-empty question
       faq:            faqItems.filter(f => f.q.trim().length > 0),
       tag:            text('tag'),
-      status:         text('status')!,
+      status:         status,
+      scheduledat:    scheduledat,
       readmin:        Number(fd.get('readmin')) || 5,
       categoryid:     text('categoryid'),
     }
@@ -186,16 +246,22 @@ export default function BlogForm({ initialData, categories }: BlogFormProps) {
           </div>
 
           <div className="form-field">
+            <label htmlFor="authorname">Author Name *</label>
+            <select id="authorname" name="authorname" defaultValue={initialData?.authorname || ''} required>
+              <option value="" disabled>Select an author</option>
+              {AUTHORS.map(a => <option key={a} value={a}>{a}</option>)}
+            </select>
+            <span className="field-hint">Byline shown on the blog detail page</span>
+          </div>
+
+          <div className="form-field">
             <label htmlFor="excerpt">Excerpt — shown as page subtitle</label>
             <textarea id="excerpt" name="excerpt" rows={2} defaultValue={initialData?.excerpt || ''} placeholder="Short summary shown in blog listing and as the page deck" />
           </div>
 
           <div className="form-field">
-            <label htmlFor="content">Content * — write HTML (h2, h3, p, blockquote, ul, etc.)</label>
-            <textarea id="content" name="content" rows={20} defaultValue={initialData?.content}
-              placeholder={'<h2>Section heading</h2>\n<p>Paragraph text here...</p>\n<blockquote>A quote</blockquote>'}
-              required className="content-textarea"
-            />
+            <label>Content *</label>
+            <RichTextEditor value={content} onChange={setContent} />
           </div>
         </div>
 
@@ -207,15 +273,37 @@ export default function BlogForm({ initialData, categories }: BlogFormProps) {
             <h3 className="form-card-title">Publish</h3>
             <div className="form-field">
               <label htmlFor="status">Status</label>
-              <select id="status" name="status" defaultValue={initialData?.status ?? 'draft'}>
+              <select id="status" name="status" value={status} onChange={e => setStatus(e.target.value)}>
                 <option value="draft">Draft</option>
+                <option value="scheduled">Scheduled</option>
                 <option value="published">Published</option>
                 <option value="archived">Archived</option>
               </select>
             </div>
+
+            {status === 'scheduled' && (
+              <div className="schedule-fields">
+                <div className="form-field">
+                  <label htmlFor="schedDate">Scheduled Date</label>
+                  <input id="schedDate" type="date" value={schedDate} onChange={e => setSchedDate(e.target.value)} />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="schedTime">Scheduled Time</label>
+                  <input id="schedTime" type="time" value={schedTime} onChange={e => setSchedTime(e.target.value)} />
+                </div>
+                <div className="form-field">
+                  <label htmlFor="schedTz">Timezone</label>
+                  <select id="schedTz" value={schedTz} onChange={e => setSchedTz(e.target.value)}>
+                    {TIMEZONES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <span className="field-hint">Auto-publishes at this time. Saved as Draft until then — cancel anytime.</span>
+              </div>
+            )}
+
             <div className="form-actions">
               <button type="submit" className="btn btn-accent" disabled={loading || coverUploading || ogUploading}>
-                {loading ? 'Saving…' : isEditing ? 'Update' : 'Publish'}
+                {loading ? 'Saving…' : status === 'scheduled' ? 'Schedule Publish' : isEditing ? 'Update' : 'Publish'}
               </button>
               <button type="button" className="btn btn-ghost" onClick={() => router.back()} disabled={loading}>Cancel</button>
             </div>
@@ -250,6 +338,16 @@ export default function BlogForm({ initialData, categories }: BlogFormProps) {
             <h3 className="form-card-title">SEO & Metadata</h3>
 
             <div className="form-field">
+              <label htmlFor="imagealt">Image Alt Tag *</label>
+              <input id="imagealt" name="imagealt" type="text"
+                defaultValue={initialData?.imagealt || ''}
+                placeholder="Describe the featured image"
+                required
+              />
+              <span className="field-hint">Used as the alt text for the featured image (SEO & accessibility)</span>
+            </div>
+
+            <div className="form-field">
               <label htmlFor="seotitle">SEO Title</label>
               <input id="seotitle" name="seotitle" type="text"
                 defaultValue={initialData?.seotitle || ''}
@@ -265,6 +363,17 @@ export default function BlogForm({ initialData, categories }: BlogFormProps) {
                 placeholder="Leave blank to use excerpt"
               />
               <span className="field-hint">Google shows ~160 characters</span>
+            </div>
+
+            <div className="form-field">
+              <label htmlFor="schemamarkup">Schema Markup (JSON-LD)</label>
+              <textarea id="schemamarkup" name="schemamarkup" rows={6}
+                defaultValue={initialData?.schemamarkup || ''}
+                placeholder={'{\n  "@context": "https://schema.org",\n  "@type": "Article"\n}'}
+                className="content-textarea"
+                style={{ minHeight: 140 }}
+              />
+              <span className="field-hint">Optional — injected into the page as &lt;script type="application/ld+json"&gt;</span>
             </div>
           </div>
 
@@ -384,6 +493,9 @@ function FormStyles() {
       .cms-form { display: flex; flex-direction: column; gap: 20px; }
       .cms-error { padding: 10px 14px; background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; border-radius: var(--radius-sm); font-size: 0.875rem; }
       .cms-form-grid { display: grid; grid-template-columns: 1fr 280px; gap: 24px; align-items: start; }
+      /* Stack the editor over the sidebar on narrow screens so the editor gets
+         full width (the toolbar was cramped in the squeezed 1fr column). */
+      @media (max-width: 860px) { .cms-form-grid { grid-template-columns: 1fr; } }
       .cms-form-main { display: flex; flex-direction: column; gap: 16px; }
       .cms-form-sidebar { display: flex; flex-direction: column; gap: 16px; }
       .form-card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
@@ -398,6 +510,7 @@ function FormStyles() {
       .form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color: var(--accent); }
       .content-textarea { min-height: 380px; font-family: var(--font-mono); font-size: 0.825rem; }
       .field-hint { font-size: 0.75rem; color: var(--fg-subtle); }
+      .schedule-fields { display: flex; flex-direction: column; gap: 12px; padding-top: 12px; margin-top: 4px; border-top: 1px dashed var(--border); }
       .form-actions { display: flex; flex-direction: column; gap: 8px; }
       .form-actions .btn { width: 100%; text-align: center; }
       .form-actions .btn:disabled { opacity: 0.6; cursor: not-allowed; }

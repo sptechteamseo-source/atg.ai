@@ -224,7 +224,6 @@ async function main() {
   console.log('📦  Migrating contact submissions…')
   const contacts = await query<{
     id: string; name: string; email: string; company: string | null;
-    role: string | null; teamsize: string | null; message: string;
     status: string; createdat: Date; updatedat: Date;
   }>('SELECT * FROM contactsubmission')
 
@@ -236,10 +235,7 @@ async function main() {
         id: c.id,
         name: c.name,
         email: c.email,
-        company: c.company,
-        role: c.role,
-        teamsize: c.teamsize,
-        message: c.message,
+        company: c.company ?? '',
         status: c.status,
         createdat: c.createdat,
         updatedat: c.updatedat,

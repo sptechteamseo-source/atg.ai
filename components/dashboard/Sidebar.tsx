@@ -89,6 +89,17 @@ const navItems: NavItem[] = [
     ),
   },
   {
+    href: '/dashboard/redirects',
+    label: 'Redirect Manager',
+    roles: ['admin', 'editor'],
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <polyline points="15 14 20 9 15 4" />
+        <path d="M4 20v-7a4 4 0 0 1 4-4h12" />
+      </svg>
+    ),
+  },
+  {
     href: '/dashboard/users',
     label: 'Users',
     roles: ['admin'],
@@ -118,6 +129,17 @@ const navItems: NavItem[] = [
       <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
         <circle cx="12" cy="8" r="4" />
         <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+      </svg>
+    ),
+  },
+  {
+    href: '/dashboard/security',
+    label: 'Security',
+    // Two-factor authentication — admins and editors only (authors have no access).
+    roles: ['admin', 'editor'],
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
       </svg>
     ),
   },
@@ -189,7 +211,7 @@ export default function Sidebar({ role }: SidebarProps) {
       <aside className={`sidebar ${isOpen ? 'sidebar--open' : ''}`}>
         {/* Logo row + mobile close button */}
         <div className="sidebar-logo">
-          <Link href="/" className="sidebar-logo-link">askgenie.ai</Link>
+          <Link href="/" className="sidebar-logo-link">Clarant</Link>
           <span className="sidebar-badge">CMS</span>
 
           {/* Close button — visible only on mobile */}

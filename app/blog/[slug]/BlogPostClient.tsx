@@ -4,20 +4,30 @@ import { useState, useEffect } from 'react'
 import Nav from '@/components/layout/Nav'
 import Footer from '@/components/layout/Footer'
 import CTA from '@/components/sections/CTA'
-import { processContent, getInitials, formatDate, formatDateShort } from '@/lib/blog-helpers'
-import type { SerializedBlog, RelatedPost } from '@/types'
+import PageAnimations from '@/components/ui/PageAnimations'
+import { processContent, getInitials, formatDate, formatDateShort, cldOptimize } from '@/lib/blog-helpers'
+import type { SerializedBlog, RelatedPost, AdjacentPost } from '@/types'
 
 const PH_COLORS = ['ph-a', 'ph-b', 'ph-c', 'ph-d', 'ph-e', 'ph-f'] as const
+
+// Author bios keyed by the hardcoded byline name.
+const AUTHOR_BIOS: Record<string, string> = {
+  'Monika Chandlani': 'She is an AI content writer at Clarant, where she writes about document intelligence, AI-powered knowledge management, and enterprise productivity. Her goal is to help readers understand how AI can simplify document analysis, deliver citation-backed answers, and improve decision-making.',
+  'Akshay Parashar': 'He is an AI content writer at Clarant, specializing in document intelligence and enterprise AI. He simplifies complex AI topics into actionable insights that help businesses work smarter with their documents.',
+  'Dhwaja Jain': 'She is a content writer at Clarant, covering AI, document intelligence, and productivity. She creates clear, practical content that helps businesses understand how AI simplifies document analysis, summarization, and knowledge retrieval.',
+  'Suraj Shinde': 'He is a content writer at Clarant who writes about AI, document analysis, and business productivity. He creates easy-to-read content that helps businesses understand how AI can summarize documents, find information quickly, and make work easier.',
+}
 
 interface BlogPostClientProps {
   blog: SerializedBlog
   related: RelatedPost[]
+  prev: AdjacentPost | null
+  next: AdjacentPost | null
 }
 
-export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
+export default function BlogPostClient({ blog, related, prev, next }: BlogPostClientProps) {
   const [progress,       setProgress]       = useState(0)
   const [activeSection,  setActiveSection]  = useState('')
-  const [feedback,       setFeedback]       = useState<string | null>(null)
   const [copied,         setCopied]         = useState(false)
 
   const { html: contentHtml, toc } = processContent(blog.content)
@@ -69,7 +79,10 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
   }
 
   const author   = blog.author
-  const initials = getInitials(author.name)
+  // Prefer the dashboard byline (blog.authorname) over the owning user's name.
+  const authorName = blog.authorname || author.name
+  const initials = getInitials(authorName)
+  const authorBio = AUTHOR_BIOS[authorName] || author.bio
   const tags     = (blog.tags ?? []).map((t) => t.tag)
   const faqItems = Array.isArray(blog.faq) ? blog.faq : []
 
@@ -79,6 +92,7 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
         <div className="read-progress-bar" style={{ width: `${progress}%` }} />
       </div>
 
+      <PageAnimations />
       <Nav basePath="/" />
 
       <main>
@@ -93,16 +107,11 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
             <nav className="post2-crumb" aria-label="Breadcrumb">
               <a href="/">Home</a><span className="sep">›</span>
               <a href="/blog">Blog</a>
-              {blog.category && (
-                <><span className="sep">›</span>
-                <a href={`/blog/topic/${blog.category.slug}`}>{blog.category.name}</a></>
-              )}
+              <span className="sep">›</span>
+              <span>{blog.title}</span>
             </nav>
 
-            <a
-              className="post2-category"
-              href={blog.category ? `/blog/topic/${blog.category.slug}` : '/blog'}
-            >
+            <a className="post2-category" href="/blog">
               {blog.category ? blog.category.name : (blog.tag ?? 'Article')} · {blog.readmin} min read
             </a>
 
@@ -112,11 +121,11 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
 
             <div className="post2-byline-strip">
               {author.image ? (
-                <img src={author.image} alt={author.name} className="byline-avatar-img" />
+                <img src={author.image} alt={authorName} className="byline-avatar-img" />
               ) : (
                 <span className="byline-avatar" aria-hidden="true">{initials}</span>
               )}
-              <strong>{author.name}</strong>
+              <strong>{authorName}</strong>
               {blog.publishedat && (
                 <>
                   <span className="sep">·</span>
@@ -131,9 +140,9 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
               )}
             </div>
 
-            <div className="post2-cover" role="img" aria-label={`Cover image for ${blog.title}`}>
+            <div className={`post2-cover${blog.coverimage ? ' has-img' : ''}`} role="img" aria-label={blog.imagealt || `Cover image for ${blog.title}`}>
               {blog.coverimage ? (
-                <img src={blog.coverimage} alt={blog.title} className="post2-cover-img" />
+                <img src={cldOptimize(blog.coverimage, 1600)} alt={blog.imagealt || blog.title} className="post2-cover-img" decoding="async" fetchPriority="high" />
               ) : (
                 <div className="ph" />
               )}
@@ -173,22 +182,6 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
                 </section>
               )}
 
-              <div className="feedback">
-                <span className="feedback-q">Was this article helpful?</span>
-                <div className="feedback-actions">
-                  {(['👍 Yes', '👎 Not really', '✉️ Share feedback'] as const).map((label) => (
-                    <button
-                      key={label}
-                      type="button"
-                      className={`fb-btn${feedback === label ? ' fb-active' : ''}`}
-                      onClick={() => setFeedback(label)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {tags.length > 0 && (
                 <div className="post2-tags" aria-label="Article tags">
                   {tags.map((tag) => (
@@ -199,14 +192,14 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
 
               <div className="author-foot">
                 {author.image ? (
-                  <img src={author.image} alt={author.name} className="author-avatar-img" />
+                  <img src={author.image} alt={authorName} className="author-avatar-img" />
                 ) : (
                   <span className="author-avatar" aria-hidden="true">{initials}</span>
                 )}
                 <div className="author-info">
-                  <h4>{author.name}</h4>
+                  <h4>{authorName}</h4>
                   {author.jobtitle && <div className="role">{author.jobtitle}</div>}
-                  {author.bio && <p>{author.bio}</p>}
+                  {authorBio && <p>{authorBio}</p>}
                 </div>
                 {(author.twitter || author.linkedin) && (
                   <div className="author-social">
@@ -223,6 +216,31 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
                   </div>
                 )}
               </div>
+
+              {/* ── PREV / NEXT NAVIGATION — compact cards directly below the author card ── */}
+              {(prev || next) && (
+                <nav className="post-nav" aria-label="More articles">
+                  {prev ? (
+                    <a className="post-nav-card is-prev" href={`/blog/${prev.slug}`}>
+                      <span className="post-nav-label">
+                        <svg className="post-nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+                        Previous Article
+                      </span>
+                      <span className="post-nav-title">{prev.title}</span>
+                    </a>
+                  ) : <span aria-hidden="true" />}
+
+                  {next ? (
+                    <a className="post-nav-card is-next" href={`/blog/${next.slug}`}>
+                      <span className="post-nav-label">
+                        Next Article
+                        <svg className="post-nav-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+                      </span>
+                      <span className="post-nav-title">{next.title}</span>
+                    </a>
+                  ) : <span aria-hidden="true" />}
+                </nav>
+              )}
             </article>
 
             <aside className="post2-rail" aria-label="Share">
@@ -263,7 +281,7 @@ export default function BlogPostClient({ blog, related }: BlogPostClientProps) {
                   <article key={p.id} className="post-card">
                     <a href={`/blog/${p.slug}`} className="post-card-media" tabIndex={-1} aria-hidden="true">
                       {p.coverimage ? (
-                        <img src={p.coverimage} alt={p.title} className="post-card-img" />
+                        <img src={cldOptimize(p.coverimage, 800)} alt={p.title} className="post-card-img" loading="lazy" />
                       ) : (
                         <div className={`ph ${PH_COLORS[i % PH_COLORS.length]}`} />
                       )}

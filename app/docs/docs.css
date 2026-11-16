@@ -1,0 +1,465 @@
+/* =========================================================
+   Documentation system — built on the global design tokens
+   defined in app/globals.css (--bg, --fg, --accent, etc.)
+   ========================================================= */
+
+.doc-page {
+  background: var(--bg);
+  color: var(--fg);
+}
+
+/* Account for the fixed/sticky Nav when jumping to anchors */
+:root { --doc-nav-offset: 92px; }
+
+.doc-wrap {
+  max-width: var(--max-w);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+
+/* ── Breadcrumb ─────────────────────────────────────────── */
+.doc-breadcrumb {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 28px 0 0;
+  font-size: 13px;
+  color: var(--fg-subtle);
+  font-family: var(--font-label);
+}
+.doc-breadcrumb a {
+  color: var(--fg-muted);
+  text-decoration: none;
+}
+.doc-breadcrumb a:hover { color: var(--accent); opacity: 1; }
+.doc-breadcrumb .sep { opacity: 0.5; }
+.doc-breadcrumb [aria-current] { color: var(--fg); }
+
+/* ── Header ─────────────────────────────────────────────── */
+.doc-header { padding: 24px 0 8px; border-bottom: 1px solid var(--border); }
+.doc-header .eyebrow { color: var(--accent); }
+.doc-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  font-size: clamp(30px, 4.6vw, 46px);
+  line-height: 1.05;
+  margin: 14px 0 0;
+  text-wrap: balance;
+}
+.doc-lede {
+  margin: 14px 0 22px;
+  max-width: 720px;
+  font-size: clamp(15px, 1.4vw, 18px);
+  line-height: 1.6;
+  color: var(--fg-muted);
+  text-wrap: pretty;
+}
+.doc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  align-items: center;
+  font-size: 13px;
+  color: var(--fg-subtle);
+  margin-bottom: 22px;
+}
+.doc-meta .dot { width: 3px; height: 3px; border-radius: 50%; background: currentColor; opacity: 0.5; }
+
+/* ── Layout: content + sticky TOC ───────────────────────── */
+.doc-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 56px;
+  align-items: start;
+  padding: 40px 0 80px;
+}
+.doc-article { min-width: 0; }
+
+/* ── Table of contents (sticky sidebar) ─────────────────── */
+.doc-toc {
+  position: sticky;
+  top: var(--doc-nav-offset);
+  align-self: start;
+  max-height: calc(100vh - var(--doc-nav-offset) - 24px);
+  overflow-y: auto;
+}
+.doc-toc-title {
+  font-family: var(--font-label);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg-subtle);
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+.doc-toc ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.doc-toc a {
+  display: block;
+  padding: 6px 12px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  color: var(--fg-muted);
+  text-decoration: none;
+  border-left: 2px solid var(--border);
+  transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+}
+.doc-toc a:hover { color: var(--fg); opacity: 1; border-left-color: var(--neutral-400); }
+.doc-toc a.is-active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+
+/* ── Article typography ─────────────────────────────────── */
+/* Override the global `section { padding: 56px 0 }` — docs rhythm is driven by
+   each section's top padding alone, so kill the inherited bottom padding. */
+.doc-section { scroll-margin-top: var(--doc-nav-offset); padding: 32px 0 0; }
+.doc-section:first-child { padding-top: 0; }
+/* Gap between sections = padding-top only; drop the trailing margin of the
+   last content block so it doesn't stack into 50px+ of empty space. */
+.doc-section > :last-child { margin-bottom: 0; }
+
+.doc-h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: clamp(24px, 3vw, 32px);
+  line-height: 1.15;
+  margin: 0 0 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.doc-h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(18px, 2vw, 21px);
+  letter-spacing: -0.01em;
+  margin: 32px 0 12px;
+}
+.doc-h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 15.5px;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  margin: 20px 0 8px;
+}
+.doc-article p {
+  font-size: 15.5px;
+  line-height: 1.7;
+  color: var(--fg-muted);
+  margin: 0 0 16px;
+}
+/* Tailwind Preflight resets list-style to none — restore markers explicitly. */
+.doc-article ul, .doc-article ol.doc-list {
+  margin: 0 0 18px;
+  padding-left: 22px;
+  color: var(--fg-muted);
+  font-size: 15.5px;
+  line-height: 1.7;
+}
+.doc-article ul { list-style-type: disc; }
+.doc-article ol.doc-list { list-style-type: decimal; }
+.doc-article li { margin: 6px 0; display: list-item; }
+.doc-article strong { color: var(--fg); font-weight: 600; }
+.doc-article a.doc-inline-link { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+
+/* ── Copy-link anchor button beside headings ────────────── */
+.doc-anchor {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fg-subtle);
+  opacity: 0;
+  transition: opacity var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  position: relative;
+  flex-shrink: 0;
+}
+.doc-h2:hover .doc-anchor { opacity: 1; }
+.doc-anchor:hover { color: var(--accent); background: var(--accent-soft); }
+.doc-anchor.is-copied { color: var(--accent); opacity: 1; }
+.doc-anchor.is-copied::after {
+  content: "Link copied";
+  position: absolute;
+  top: -30px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 11px;
+  font-family: var(--font-label);
+  padding: 3px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+@media (hover: none) { .doc-anchor { opacity: 1; } }
+
+/* ── Callouts / Alerts ──────────────────────────────────── */
+.callout {
+  display: flex;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: var(--radius-md);
+  background: var(--bg-elevated);
+  margin: 0 0 20px;
+}
+.callout-icon { flex-shrink: 0; margin-top: 1px; }
+.callout-body { font-size: 14.5px; line-height: 1.6; color: var(--fg-muted); }
+.callout-body p { font-size: inherit; margin: 0 0 6px; }
+.callout-body p:last-child { margin: 0; }
+.callout-title { display: block; font-weight: 600; color: var(--fg); margin-bottom: 4px; font-family: var(--font-display); }
+
+.callout--info    { border-left-color: var(--accent); }
+.callout--info    .callout-icon { color: var(--accent); }
+.callout--warning { border-left-color: #d9a93a; }
+.callout--warning .callout-icon { color: #d9a93a; }
+.callout--danger  { border-left-color: var(--danger); }
+.callout--danger  .callout-icon { color: var(--danger); }
+.callout--success { border-left-color: #2fa66b; }
+.callout--success .callout-icon { color: #2fa66b; }
+
+/* ── Step sections ──────────────────────────────────────── */
+.doc-steps { display: flex; flex-direction: column; gap: 20px; margin: 8px 0 8px; counter-reset: step; }
+.doc-step {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.doc-step-num {
+  width: 36px; height: 36px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+}
+.doc-step-body { min-width: 0; }
+.doc-step-title { font-family: var(--font-display); font-weight: 600; font-size: 17px; margin: 4px 0 8px; color: var(--fg); }
+.doc-step-body p { margin: 0 0 10px; }
+.doc-step-body ul { margin: 0 0 10px; }
+
+/* ── Tables ─────────────────────────────────────────────── */
+.doc-table-wrap {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+  margin: 0 0 20px;
+  background: var(--bg-elevated);
+}
+.doc-table { width: 100%; border-collapse: collapse; font-size: 14.5px; min-width: 460px; }
+.doc-table th, .doc-table td { text-align: left; padding: 11px 16px; border-bottom: 1px solid var(--border); }
+.doc-table th { background: var(--bg-sunken); font-family: var(--font-display); font-weight: 600; color: var(--fg); font-size: 13px; letter-spacing: 0.01em; }
+.doc-table td { color: var(--fg-muted); vertical-align: top; }
+.doc-table tr:last-child td { border-bottom: none; }
+
+/* ── Question / example pills ───────────────────────────── */
+.doc-qcard {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  margin: 0 0 12px;
+}
+.doc-qcard-h { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--fg); margin: 0 0 8px; }
+.doc-qlist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.doc-qlist li {
+  position: relative;
+  padding-left: 22px;
+  font-size: 14.5px;
+  color: var(--fg-muted);
+  line-height: 1.5;
+}
+.doc-qlist li::before {
+  
+  position: absolute; left: 4px; top: 2px;
+  color: var(--accent);
+  font-family: var(--font-display); 
+  font-weight: 700;
+}
+
+/* ── Figures / screenshots ──────────────────────────────── */
+.doc-figure { margin: 18px 0 24px; }
+.doc-figure-img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  background: var(--bg-sunken);
+  display: block;
+}
+.doc-figure-pending {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 1.5px dashed var(--border);
+  border-radius: var(--radius-md);
+  background:
+    repeating-linear-gradient(45deg, var(--bg-elevated), var(--bg-elevated) 12px, var(--bg-sunken) 12px, var(--bg-sunken) 24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: var(--fg-subtle);
+  text-align: center;
+  padding: 16px;
+}
+.doc-figure-pending-title { font-family: var(--font-display); font-weight: 600; font-size: 14px; color: var(--fg-muted); }
+.doc-figure-pending-path { font-family: var(--font-mono); font-size: 12px; color: var(--fg-subtle); background: var(--bg); padding: 3px 8px; border-radius: 6px; border: 1px solid var(--border); }
+.doc-figure-cap {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--fg-subtle);
+  font-style: italic;
+  text-align: center;
+}
+
+/* ── Prev / next navigation ─────────────────────────────── */
+.doc-prevnext {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 48px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+.doc-nav-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elevated);
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease);
+}
+.doc-nav-card:hover { border-color: var(--neutral-400); transform: translateY(-2px); opacity: 1; }
+.doc-nav-card.is-next { text-align: right; align-items: flex-end; }
+.doc-nav-card.is-disabled { opacity: 0.5; cursor: default; pointer-events: none; }
+.doc-nav-dir { font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-subtle); font-family: var(--font-label); font-weight: 600; }
+.doc-nav-label { font-family: var(--font-display); font-weight: 600; font-size: 15.5px; color: var(--fg); }
+
+/* ── Docs index (landing) ───────────────────────────────── */
+.doc-index-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; padding: 24px 0 80px; }
+.doc-index-card {
+  display: flex;
+  flex-direction: column;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: linear-gradient(160deg, color-mix(in oklab, var(--bg-elevated) 92%, var(--accent) 4%), var(--bg-elevated));
+  text-decoration: none;
+  transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
+}
+.doc-index-card:hover {
+  border-color: color-mix(in oklab, var(--accent) 55%, var(--border));
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px -14px color-mix(in oklab, var(--accent) 45%, transparent);
+  opacity: 1;
+}
+.doc-index-card h3 { font-size: 17px; line-height: 1.3; margin: 6px 0 0; }
+.doc-index-card p { font-size: 14px; color: var(--fg-muted); line-height: 1.55; margin: 14px 0 0; }
+
+/* Header row: logo + (badge / title) */
+.doc-card-head { display: flex; align-items: center; gap: 16px; }
+.doc-card-headtext { min-width: 0; }
+
+/* Connector logo container */
+.doc-card-logo {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  padding: 11px;
+  border: 1px solid var(--border);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.96);
+  transition: transform var(--dur) var(--ease), border-color var(--dur) var(--ease);
+}
+.doc-card-logo img { max-width: 100%; max-height: 100%; width: auto; height: auto; object-fit: contain; display: block; }
+.doc-card-logo-mono { font-family: var(--font-display); font-weight: 700; font-size: 26px; line-height: 1; color: var(--accent); }
+.doc-index-card:hover .doc-card-logo { transform: scale(1.05) translateY(-1px); border-color: color-mix(in oklab, var(--accent) 45%, var(--border)); }
+
+/* CONNECTOR badge (no decorative line) */
+.doc-card-badge {
+  display: inline-block;
+  font-family: var(--font-label);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  padding: 3px 9px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+}
+
+/* View guide CTA */
+.doc-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent);
+}
+.doc-card-cta span { transition: transform var(--dur) var(--ease); }
+.doc-index-card:hover .doc-card-cta span { transform: translateX(4px); }
+
+@media (max-width: 640px) {
+  .doc-card-logo { width: 52px; height: 52px; padding: 9px; border-radius: 13px; }
+  .doc-card-logo-mono { font-size: 22px; }
+  .doc-card-head { gap: 13px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .doc-index-card, .doc-card-logo, .doc-card-cta span { transition: none; }
+  .doc-index-card:hover { transform: none; }
+  .doc-index-card:hover .doc-card-logo { transform: none; }
+  .doc-index-card:hover .doc-card-cta span { transform: none; }
+}
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .doc-layout { grid-template-columns: 1fr; gap: 0; }
+  .doc-toc {
+    position: static;
+    max-height: none;
+    margin-bottom: 28px;
+    padding: 16px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+    order: -1; /* show TOC above content on tablet/mobile */
+  }
+  .doc-toc a { border-left: none; padding: 5px 0; }
+  .doc-toc a.is-active { border-left: none; }
+}
+@media (max-width: 640px) {
+  .doc-step { grid-template-columns: 1fr; gap: 10px; }
+  .doc-step-num { width: 32px; height: 32px; font-size: 14px; }
+  .doc-prevnext { grid-template-columns: 1fr; }
+  .doc-nav-card.is-next { text-align: left; align-items: flex-start; }
+}

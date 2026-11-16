@@ -75,10 +75,10 @@ export default function FAQ() {
         <div className="container faq-grid">
           <div className="faq-side" data-reveal="fade-right">
             <span className="eyebrow">FAQ</span>
-            <h2 className="section-title">Things you&apos;ll want to <em>ask</em>.</h2>
+            <h2 className="section-title">Frequently Asked <em>Questions</em></h2>
             <p className="section-lede">
               More questions? Email{' '}
-              <a href="mailto:hello@askthegenie.ai">hello@askthegenie.ai</a>{' '}
+              <a href="mailto:support@clarant.ai">support@clarant.ai</a>{' '}
               — a real human responds in under an hour.
             </p>
           </div>

@@ -12,6 +12,7 @@ const permissions = {
     'publish:content',
     'view:analytics',
     'manage:settings',
+    'manage:redirects',
   ],
   editor: [
     'manage:blogs',
@@ -19,6 +20,7 @@ const permissions = {
     'manage:testimonials',
     'publish:content',
     'view:analytics',
+    'manage:redirects',
   ],
   author: [
     'create:blogs',

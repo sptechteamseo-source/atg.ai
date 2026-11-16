@@ -2,6 +2,8 @@ import { prisma } from '@/lib/prisma'
 import { auth } from '@/lib/auth'
 import DashboardHeader from '@/components/dashboard/Header'
 import DeleteButton from '@/components/dashboard/DeleteButton'
+import CancelScheduleButton from '@/components/dashboard/CancelScheduleButton'
+import { formatInTz } from '@/lib/schedule'
 import Link from 'next/link'
 
 export default async function BlogsPage() {
@@ -20,6 +22,11 @@ export default async function BlogsPage() {
 
   const isAdmin = session?.user?.role === 'admin'
 
+  // Trash count — explicit deletedat filter bypasses the soft-delete extension.
+  const trashCount = isAdmin
+    ? await prisma.blog.count({ where: { deletedat: { not: null } } })
+    : 0
+
   return (
     <>
       <DashboardHeader
@@ -30,6 +37,11 @@ export default async function BlogsPage() {
       <div className="dash-content">
         {/* Toolbar */}
         <div className="list-toolbar">
+          {isAdmin && (
+            <Link href="/dashboard/blogs/trash" className="btn btn-ghost">
+              Trash{trashCount > 0 ? ` (${trashCount})` : ''}
+            </Link>
+          )}
           <Link href="/dashboard/blogs/new" className="btn btn-accent">
             + New Blog
           </Link>
@@ -71,13 +83,17 @@ export default async function BlogsPage() {
                         <span className={`status-badge status-${blog.status.toLowerCase()}`}>
                           {blog.status}
                         </span>
+                        {blog.status === 'scheduled' && blog.scheduledat && (
+                          <div className="sched-when">{formatInTz(blog.scheduledat)}</div>
+                        )}
                       </td>
                       <td className="col-date">{new Date(blog.updatedat).toLocaleDateString()}</td>
                       <td>
                         <div className="table-actions">
                           <Link href={`/dashboard/blogs/${blog.id}/edit`} className="action-btn">
-                            Edit
+                            {blog.status === 'scheduled' ? 'Edit / Reschedule' : 'Edit'}
                           </Link>
+                          {blog.status === 'scheduled' && <CancelScheduleButton id={blog.id} />}
                           <Link href={`/blog/${blog.slug}`} target="_blank" className="action-btn action-btn--ghost">
                             View
                           </Link>
@@ -105,13 +121,19 @@ export default async function BlogsPage() {
                       {blog.status}
                     </span>
                   </div>
+                  {blog.status === 'scheduled' && blog.scheduledat && (
+                    <div className="sched-when">🕑 {formatInTz(blog.scheduledat)}</div>
+                  )}
                   <div className="blog-card-meta">
                     <span>{blog.author.name}</span>
                     {blog.category && <span> · {blog.category.name}</span>}
                     <span> · {new Date(blog.updatedat).toLocaleDateString()}</span>
                   </div>
                   <div className="table-actions">
-                    <Link href={`/dashboard/blogs/${blog.id}/edit`} className="action-btn">Edit</Link>
+                    <Link href={`/dashboard/blogs/${blog.id}/edit`} className="action-btn">
+                      {blog.status === 'scheduled' ? 'Edit / Reschedule' : 'Edit'}
+                    </Link>
+                    {blog.status === 'scheduled' && <CancelScheduleButton id={blog.id} />}
                     <Link href={`/blog/${blog.slug}`} target="_blank" className="action-btn action-btn--ghost">View</Link>
                     {isAdmin && <DeleteButton id={blog.id} apiPath="blogs" />}
                   </div>
@@ -131,7 +153,7 @@ function TableStyles() {
   return (
     <style>{`
       .dash-content { padding: 28px 32px; display: flex; flex-direction: column; gap: 20px; }
-      .list-toolbar { display: flex; justify-content: flex-end; }
+      .list-toolbar { display: flex; justify-content: flex-end; gap: 8px; }
 
       .empty-box {
         text-align: center;
@@ -217,7 +239,9 @@ function TableStyles() {
       }
       .status-published { background: #f0fdf4; color: #16a34a; }
       .status-draft { background: var(--bg-sunken); color: var(--fg-muted); border: 1px solid var(--border); }
+      .status-scheduled { background: #eff6ff; color: #2563eb; }
       .status-archived { background: #fef2f2; color: #dc2626; }
+      .sched-when { font-size: 0.72rem; color: var(--fg-muted); margin-top: 4px; white-space: nowrap; }
 
       /* ── Mobile cards ────────────────────────────────── */
       .card-list { display: flex; flex-direction: column; gap: 12px; }

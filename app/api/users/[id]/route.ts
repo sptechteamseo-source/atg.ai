@@ -1,16 +1,8 @@
 import { NextRequest } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { requirePermission } from '@/lib/rbac'
+import { parseUserUpdate } from '@/lib/user-validation'
 import bcrypt from 'bcryptjs'
-import { z } from 'zod'
-
-const updateSchema = z.object({
-  name: z.string().min(1).optional(),
-  email: z.string().email().optional(),
-  password: z.string().min(8).optional(),
-  role: z.enum(['admin', 'editor', 'author']).optional(),
-  image: z.string().optional(),
-})
 
 export async function GET(
   _request: NextRequest,
@@ -27,6 +19,7 @@ export async function GET(
         name: true,
         email: true,
         role: true,
+        status: true,
         image: true,
         createdat: true,
         _count: { select: { blogs: true, usecases: true } },
@@ -51,16 +44,46 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requirePermission('manage:users')
+    const session = await requirePermission('manage:users')
     const { id } = await params
 
-    const body = await request.json()
-    const parsed = updateSchema.safeParse(body)
-    if (!parsed.success) {
-      return Response.json({ success: false, error: parsed.error.issues[0].message }, { status: 400 })
+    const result = parseUserUpdate(await request.json())
+    if ('error' in result) {
+      return Response.json({ success: false, error: result.error }, { status: 400 })
+    }
+    const data = result.data
+
+    // Reject an update that would change nothing (all fields blank/untouched).
+    if (Object.keys(data).length === 0) {
+      return Response.json({ success: false, error: 'No changes to save' }, { status: 400 })
     }
 
-    const { password, ...rest } = parsed.data
+    // The target user must exist.
+    const target = await prisma.users.findUnique({ where: { id }, select: { id: true } })
+    if (!target) {
+      return Response.json({ success: false, error: 'User not found' }, { status: 404 })
+    }
+
+    // Prevent admins from locking themselves out by demoting or
+    // deactivating their own account.
+    if (id === session.user.id) {
+      if (data.role && data.role !== 'admin') {
+        return Response.json({ success: false, error: 'You cannot change your own role' }, { status: 400 })
+      }
+      if (data.status === 'inactive') {
+        return Response.json({ success: false, error: 'You cannot deactivate your own account' }, { status: 400 })
+      }
+    }
+
+    // Guard email uniqueness when changing it
+    if (data.email) {
+      const existing = await prisma.users.findUnique({ where: { email: data.email } })
+      if (existing && existing.id !== id) {
+        return Response.json({ success: false, error: 'Email already in use' }, { status: 409 })
+      }
+    }
+
+    const { password, ...rest } = data
 
     // Hash password if it's being changed
     const updateData: any = { ...rest }
@@ -76,6 +99,7 @@ export async function PUT(
         name: true,
         email: true,
         role: true,
+        status: true,
         image: true,
         createdat: true,
       },

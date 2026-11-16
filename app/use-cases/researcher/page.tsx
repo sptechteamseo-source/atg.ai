@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import Nav    from '@/components/layout/Nav'
 import Footer from '@/components/layout/Footer'
 import CTA    from '@/components/sections/CTA'
@@ -36,7 +36,7 @@ function useCountUp() {
         const suffix = target.replace(/[\d.]+/, '')
         const num = parseFloat(target)
         if (isNaN(num)) { el.textContent = target; io.unobserve(el); return }
-        let start = 0; const dur = 1600; const startTime = performance.now()
+        const dur = 1600; const startTime = performance.now()
         const tick = (now: number) => {
           const p = Math.min((now - startTime) / dur, 1)
           const ease = 1 - Math.pow(1 - p, 3)
@@ -73,57 +73,59 @@ function ImageSlot({ placeholder = 'Drop an image' }: { placeholder?: string }) 
 const EXPLAINED = [
   {
     kicker: 'How it works', n: '01',
-    heading: 'From a folder of PDFs to a cited synthesis, automatically.',
-    body: 'Connect your reference library or drop in PDFs and AI for Researchers reads every paper — extracting methods, findings, limitations and how studies relate. Ask a question and it returns a grounded synthesis, with each claim cited to the exact paper and page so you can verify in one click.',
-    bullets: ['Ingests PDFs, preprints, DOIs & reference libraries', 'Extracts methods, findings, datasets & limitations', 'Answers in plain language, citing the exact paper'],
+    heading: 'From research paper to cited insight, automatically.',
+    body: 'Upload or connect your research documents and Clarant builds a searchable understanding of every paper. Using advanced AI Document Intelligence for Researchers, it identifies key concepts, findings, methodologies, and references across your document collection.',
+    bullets: ['Ingests PDFs, journals, reports, whitepapers, and research papers', 'Extracts findings, methodologies, citations, and conclusions', 'Answers questions with source-backed citations', 'Searches across hundreds of documents simultaneously'],
     placeholder: 'Extracted findings',
-    img: '/images/researcher-how-it-works.png',
-    imgAlt: 'AI for Researchers — reads PDFs and reference libraries, extracts methods, findings and limitations, returns cited answers',
+    img: '/images/From-a-folder-of-PDFs-to-a-cited-synthesis-New.png',
+    imgAlt: 'AI Research Assistant — reads PDFs and reference libraries, extracts findings and methodologies, returns cited answers',
   },
   {
     kicker: 'Why researchers use it', n: '02',
-    heading: 'Because the literature grows faster than anyone can read it.',
-    body: 'Researchers use AI for Researchers to keep pace with thousands of new papers a month and to synthesize across them without missing a critical result. Common use cases span the whole research lifecycle.',
-    bullets: ['Literature reviews & systematic reviews', 'Grant proposals & background sections', 'Staying current on a fast-moving field', 'Comparing methods & results across studies', 'Fact-checking claims against primary sources'],
+    heading: "Because literature reviews shouldn't take weeks.",
+    body: 'Researchers spend countless hours searching through papers, comparing findings, identifying relevant sources, and synthesizing information. AI Document Intelligence for Researchers helps streamline the entire research workflow.',
+    bullets: ['Literature reviews and academic research', 'Research paper comparison and synthesis', 'Evidence gathering and citation discovery', 'Competitive and market research', 'Policy and regulatory analysis', 'Scientific and technical research'],
     placeholder: 'This week in your field',
-    img: '/images/researcher-why-teams-use-it.png',
-    imgAlt: 'AI for Researchers — keeps you current on fast-moving fields, surfaces new papers and flags contradicting studies',
+    img: '/images/Because-the-literature-grows-faster-than-anyone.png',
+    imgAlt: 'AI Research Assistant — keeps you current on fast-moving fields, surfaces new papers and flags contradicting studies',
   },
   {
     kicker: 'What you get', n: '03',
-    heading: "A literature process that's faster, deeper and fully cited.",
-    body: 'Every answer AI for Researchers returns is grounded in the papers you trust and cited to the source — so you move faster without trading away rigor. The outcome is a defensible, reproducible synthesis your collaborators and reviewers can follow.',
-    bullets: ['Cited, verifiable answers on every question', 'Contradicting findings surfaced, not buried', 'A complete trail of every source & claim', 'Export-ready references in your citation style'],
+    heading: 'Faster research, better insights, and complete traceability.',
+    body: 'Every answer is grounded in your uploaded research materials and linked directly to the original source. Researchers can move faster without sacrificing accuracy or credibility.',
+    bullets: ['Citation-backed answers for every query', 'Faster literature reviews and evidence gathering', 'Complete visibility into source material', 'Consistent analysis across large document collections', 'Reduced time spent searching and summarizing'],
     placeholder: 'Cited synthesis',
+       img: '/images/A-literature-process-thats-faster.png',
+    imgAlt: 'AI Research Assistant — grounds every answer in your research materials with citations to the source',
   },
 ]
 
 const STEPS = [
-  { kicker: 'Step 1', n: '01', title: 'Add your papers',             body: 'Connect Zotero, Mendeley or your reference library — or drag in a folder of PDFs and DOIs. AI for Researchers reads and indexes everything in minutes.' },
-  { kicker: 'Step 2', n: '02', title: 'Ask your research question',  body: "Type a question like \"what methods did 2024 studies use, and what did they find?\" No search operators — just ask the way you'd ask a colleague." },
-  { kicker: 'Step 3', n: '03', title: 'Verify the cited source',     body: 'Get a grounded synthesis with each claim cited to the exact paper, section and page. Click any citation to jump straight to the source and confirm.' },
-  { kicker: 'Step 4', n: '04', title: 'Export a referenced summary', body: 'Turn your synthesis into a referenced literature summary in your citation style — ready to drop into a paper, grant or review.' },
+  { kicker: 'Step 1', n: '01', title: 'Connect your research documents', body: 'Upload research papers, academic journals, reports, whitepapers, theses, and other knowledge sources. Clarant indexes and organizes everything automatically.' },
+  { kicker: 'Step 2', n: '02', title: 'Ask research questions',  body: 'Ask questions like "What are the main findings across these studies?", "Which papers discuss reinforcement learning?" or "What methodologies were used in these experiments?"' },
+  { kicker: 'Step 3', n: '03', title: 'Verify every citation',     body: 'Every answer includes direct citations so you can quickly validate findings and jump to the source material.' },
+  { kicker: 'Step 4', n: '04', title: 'Scale your research workflow', body: 'Use the platform across research teams, universities, consulting firms, think tanks, and innovation groups.' },
 ]
 
 const PROBLEMS = [
-  { icon: '∞', title: 'Information overload',     body: 'Surface the findings that matter across thousands of papers — without reading each one.' },
-  { icon: '⏱', title: 'Slow literature reviews',  body: 'Synthesize a topic in an afternoon instead of three weeks of manual reading.' },
-  { icon: '◎', title: 'Missing key findings',     body: 'Catch the critical result — or the contradicting study — that a keyword search would bury.' },
-  { icon: '"', title: 'Citation management',      body: 'Every claim is traced to its source and exported in your citation style automatically.' },
-  { icon: '✓', title: 'Verifying claims',         body: 'Cited, grounded answers let you check primary sources instead of trusting a summary.' },
-  { icon: '✧', title: 'Synthesis across sources', body: 'Compare methods, datasets and results across many papers in one grounded view.' },
+  { icon: '∞', title: 'Time-consuming literature reviews', body: 'Analyze hundreds of papers without reading every page manually.' },
+  { icon: '⏱', title: 'Information overload',     body: 'Surface the most relevant findings instantly.' },
+  { icon: '◎', title: 'Research discovery',       body: 'Find connections, trends, and supporting evidence across documents.' },
+  { icon: '"', title: 'Missed insights',          body: 'Identify important findings hidden across multiple sources.' },
+  { icon: '✓', title: 'Knowledge fragmentation',  body: 'Centralize research documents in one searchable workspace.' },
+  { icon: '✧', title: 'Citation verification',    body: 'Every answer includes source references for confidence and accuracy.' },
 ]
 
 const FEATURES = [
-  { icon: '≡', title: 'Paper summarization',    body: 'A 30-page study distilled to its question, method, finding and limitation.' },
-  { icon: '◎', title: 'Key-finding extraction', body: 'Pulls results, effect sizes, datasets and caveats into a structured view.' },
-  { icon: '✧', title: 'Literature synthesis',   body: 'Synthesizes across many papers and flags where they agree or conflict.' },
-  { icon: '"', title: 'Citation extraction',    body: 'Every claim cited to the source and exported in your reference style.' },
-  { icon: '🔍', title: 'Cross-paper search',   body: 'Ask anything across your whole library and get the exact passage cited.' },
-  { icon: '↻', title: 'Stay-current alerts',   body: 'Weekly digests of new papers that match your saved research topics.' },
+  { icon: '≡', title: 'Research Paper Analysis Tool', body: 'Analyze methodologies, findings, limitations, and conclusions across research papers.' },
+  { icon: '◎', title: 'Research Paper Summarization', body: 'Generate concise summaries of lengthy papers, reports, and academic publications.' },
+  { icon: '✧', title: 'Semantic research search', body: 'Ask questions naturally and find relevant information across your entire library.' },
+  { icon: '"', title: 'Cross-document analysis',  body: 'Compare findings, methodologies, and results across multiple studies.' },
+  { icon: '🔍', title: 'Citation-backed answers', body: 'Every insight is linked directly to the original source.' },
+  { icon: '↻', title: 'Knowledge extraction',    body: 'Automatically surface trends, themes, and key concepts.' },
 ]
 
-const BENEFITS = ['Faster literature reviews', 'Stay current effortlessly', 'Never miss a key finding', 'Verifiable citations', 'More time for analysis', 'Stronger research synthesis']
+const BENEFITS = ['Faster literature reviews', 'Improved research quality', 'Better evidence gathering', 'Reduced manual effort', 'Increased productivity', 'Faster knowledge discovery', 'More reliable insights', 'Better collaboration']
 
 const STATS = [
   { n: '10×',  raw: '10×',  label: 'Faster literature reviews across research teams', source: 'source: 9 research customer surveys · 2026' },
@@ -136,10 +138,10 @@ const LOGOS = ['Quanta Lab', 'Helio Health', 'Northwind', 'Orbit', 'Parallax', '
 const LOGOS_DOUBLED = [...LOGOS, ...LOGOS] // for seamless marquee
 
 const MORE = [
-  { icon: '⚖', title: 'AI for Legal Documents', desc: 'Review contracts, extract clauses and surface risk in seconds — every answer cited to the exact clause.',       link: 'Explore legal use case',      href: '/use-cases/ai-for-legal-documents' },
-  { icon: '◆', title: 'Sales',                  desc: 'Prep for calls in seconds, follow up the same day, and never lose a deal to a missed detail again.',           link: 'Explore sales use case',      href: '/use-cases/sales' },
-  { icon: '✦', title: 'Marketing',              desc: 'Research campaigns, create on-brand content and get instant answers from your brand library.',                 link: 'Explore marketing use case',  href: '/use-cases/marketing' },
-  { icon: '✚', title: 'Healthcare',             desc: 'Answer clinical, operational and compliance questions — cited from your protocols, policies, and payer rules.', link: 'Explore healthcare use case', href: '/use-cases/healthcare' },
+  { icon: '◎', title: 'Researchers',     desc: 'Analyze academic papers, compare studies, and uncover insights faster with source-backed answers.', link: 'Book a demo',            href: 'https://calendly.com/nparikh-clarant/30min' },
+  { icon: '◆', title: 'Revenue teams',   desc: 'Turn market reports, industry studies, and analyst research into actionable insights.',               link: 'Explore sales use case', href: '/use-cases/sales' },
+  { icon: '◉', title: 'Operations teams', desc: 'Make institutional knowledge searchable across teams, projects, and regions.',                        link: 'Book a demo',            href: 'https://calendly.com/nparikh-clarant/30min' },
+  { icon: '✦', title: 'Customer success', desc: 'Access product documentation, research findings, and customer insights instantly.',                   link: 'Book a demo',            href: 'https://calendly.com/nparikh-clarant/30min' },
 ]
 
 export default function ResearcherPage() {
@@ -148,7 +150,6 @@ export default function ResearcherPage() {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: PAGE_CSS }} />
       <Nav basePath="/" />
       <main id="main">
 
@@ -163,14 +164,14 @@ export default function ResearcherPage() {
             <div>
               <div className="persona-eyebrow hero-anim" style={{ animationDelay: '0ms' }}>For researchers, analysts &amp; academics</div>
               <h1 id="ph1" className="persona-h1 hero-anim" style={{ animationDelay: '90ms' }}>
-                <em>AI for Researchers</em> that reads every paper for you.
+                <em>AI Research Assistant</em> that reads every paper for you.
               </h1>
               <p className="persona-lede hero-anim" style={{ animationDelay: '190ms' }}>
-                AI for Researchers from Ask the Genie reads, summarizes and synthesizes academic papers — extracting the key findings and citing every source. Run a literature review in an afternoon, stay on top of your field, and never miss a critical result again.
+                AI Research Assistant from Clarant reads research papers, journals, reports, theses, datasets, and academic documents — then answers questions with the exact source cited. Accelerate literature reviews, uncover insights faster, and spend more time on discovery instead of searching through hundreds of pages.
               </p>
               <div className="persona-cta-row hero-anim" style={{ animationDelay: '290ms' }}>
-                <a className="btn btn-accent" href="/#cta">Start Free Trial <ArrowRight size={14} /></a>
-                <a className="btn btn-ghost" href="/#demo">Schedule Demo</a>
+                <a className="btn btn-accent" href="https://app.clarant.ai/login">Start Free Trial <ArrowRight size={14} /></a>
+                <a className="btn btn-ghost" href="https://calendly.com/nparikh-clarant/30min">Schedule Demo</a>
               </div>
             </div>
 
@@ -199,9 +200,9 @@ export default function ResearcherPage() {
         {/* ── EXPLAINED ── */}
         <section className="persona-uses" id="explained" aria-labelledby="explained-h">
           <div className="container">
-            <h2 id="explained-h" className="persona-uses-h" data-reveal="fade-up">AI for Researchers — explained.</h2>
+            <h2 id="explained-h" className="persona-uses-h" data-reveal="fade-up">AI Research Assistant — explained.</h2>
             <p className="persona-uses-lede" data-reveal="fade-up" style={{ '--reveal-delay': '80ms' } as any}>
-              AI for Researchers is software that reads academic literature the way a domain expert would — understanding methods, findings, limitations and how papers relate — and answers your questions in plain language, with every claim cited back to the exact paper. It turns weeks of manual literature review into an afternoon of grounded synthesis.
+              An AI Research Assistant helps researchers, analysts, students, scientists, and knowledge workers understand large volumes of information quickly. It reads and analyzes research documents, identifies key findings, methodologies, and conclusions, then provides grounded answers with citations back to the original source. Instead of manually reviewing dozens of papers, users can get trusted insights in seconds.
             </p>
             {EXPLAINED.map((item, i) => (
               <div key={i}
@@ -220,7 +221,14 @@ export default function ResearcherPage() {
                 </div>
                 <div className={`use-visual--img${(item as any).img ? ' has-img' : ''}`}>
                   {(item as any).img ? (
-                    <Image src={(item as any).img} alt={(item as any).imgAlt ?? item.placeholder} fill className="use-visual-img-real" style={{ objectFit: 'cover', padding: '12px' }} />
+                    <Image
+                      src={(item as any).img}
+                      alt={(item as any).imgAlt ?? item.placeholder}
+                      width={1536}
+                      height={1024}
+                      sizes="(max-width: 880px) 100vw, 50vw"
+                      className="use-visual-img-real"
+                    />
                   ) : (
                     <ImageSlot placeholder={item.placeholder} />
                   )}
@@ -233,9 +241,9 @@ export default function ResearcherPage() {
         {/* ── HOW TO USE ── */}
         <section className="persona-more" aria-labelledby="howto-h">
           <div className="container">
-            <h2 id="howto-h" className="persona-more-h" data-reveal="fade-up">How to use AI for Researchers: step-by-step.</h2>
+            <h2 id="howto-h" className="persona-more-h" data-reveal="fade-up">How to use AI Research Assistant: step-by-step.</h2>
             <p className="persona-uses-lede" data-reveal="fade-up" style={{ marginBottom: 36, '--reveal-delay': '60ms' } as any}>
-              Getting started takes four steps — no setup project, no new query language. Add your papers, ask your question, verify the citation, and export a referenced summary.
+              Getting started takes just a few minutes. Upload your research documents, ask questions, verify sources, and accelerate your research process.
             </p>
             <div className="legal-steps">
               {STEPS.map((s, i) => (
@@ -253,7 +261,7 @@ export default function ResearcherPage() {
         {/* ── PROBLEMS ── */}
         <section className="persona-more" aria-labelledby="problems-h">
           <div className="container">
-            <h2 id="problems-h" className="persona-more-h" data-reveal="fade-up">Problems we solve at Ask the Genie related to AI for Researchers.</h2>
+            <h2 id="problems-h" className="persona-more-h" data-reveal="fade-up">Problems we solve at Clarant related to AI Document Intelligence for Researchers.</h2>
             <div className="legal-problem-grid">
               {PROBLEMS.map((p, i) => (
                 <div className="legal-problem problem-item" key={i} data-reveal="fade-up" style={{ '--reveal-delay': `${(i%2)*80}ms` } as any}>
@@ -268,7 +276,7 @@ export default function ResearcherPage() {
         {/* ── FEATURES & BENEFITS ── */}
         <section className="persona-more" aria-labelledby="features-h" style={{ paddingTop: 0 }}>
           <div className="container">
-            <h2 id="features-h" className="persona-more-h" data-reveal="fade-up">AI for Researchers — features, benefits &amp; key capabilities.</h2>
+            <h2 id="features-h" className="persona-more-h" data-reveal="fade-up">AI Document Intelligence for Researchers — features, benefits &amp; key capabilities.</h2>
 
             <div className="cs-eyebrow-row"><span className="eyebrow">Key features</span></div>
             <div className="legal-feat-panel">
@@ -281,7 +289,7 @@ export default function ResearcherPage() {
             </div>
 
             <div className="cs-eyebrow-row" style={{ marginTop: 48 }}>
-              <span className="eyebrow">Benefits for researchers &amp; teams</span>
+              <span className="eyebrow">Benefits for researchers and organizations</span>
             </div>
             <div className="legal-benefit-grid">
               {BENEFITS.map((b, i) => (
@@ -297,6 +305,7 @@ export default function ResearcherPage() {
         </section>
 
         {/* ── QUOTE ── */}
+        {/*
         <section className="persona-quote" aria-labelledby="quote-h">
           <div className="container persona-quote-inner">
             <div className="persona-quote-card" data-reveal="fade-right">
@@ -311,7 +320,7 @@ export default function ResearcherPage() {
             </div>
           </div>
         </section>
-
+/*}
         {/* ── STATS ── */}
         <section className="persona-stats" aria-labelledby="stats-h" id="stats">
           <div className="container">
@@ -331,7 +340,7 @@ export default function ResearcherPage() {
         {/* ── DISCOVER MORE ── */}
         <section className="persona-more" aria-labelledby="more-h">
           <div className="container">
-            <h2 id="more-h" className="persona-more-h" data-reveal="fade-up">Discover how other teams use askthegenie.</h2>
+            <h2 id="more-h" className="persona-more-h" data-reveal="fade-up">Discover how other teams use Clarant.</h2>
             <div className="persona-more-grid">
               {MORE.map((m, i) => (
                 <a className="persona-more-card more-card" href={m.href} key={i} data-reveal="pop" style={{ '--reveal-delay': `${i*70}ms` } as any}>
@@ -369,261 +378,3 @@ export default function ResearcherPage() {
 }
 
 /* ─── All CSS (keyframes & scroll-reveal system are in globals.css) ─── */
-const PAGE_CSS = `
-/* ══════════════════ HERO ══════════════════ */
-
-.persona-hero {
-  position:relative;
-  padding:clamp(72px,9vw,120px) 0 clamp(56px,7vw,96px);
-  overflow:hidden;
-  border-bottom:1px solid var(--border);
-}
-.persona-hero-bg { position:absolute; inset:0; z-index:0; pointer-events:none; }
-.persona-hero-bg .glow {
-  position:absolute; right:-200px; top:-200px;
-  width:900px; height:700px; border-radius:50%;
-  background:radial-gradient(closest-side,var(--accent-glow),transparent 70%);
-  filter:blur(40px); opacity:.8;
-}
-.glow-pulse {
-  position:absolute; left:50%; top:-260px;
-  width:700px; height:500px; border-radius:50%;
-  background:radial-gradient(closest-side,var(--accent-glow),transparent 70%);
-  filter:blur(60px);
-  animation: glowPulse 5s ease-in-out infinite;
-}
-.persona-hero-bg .grid {
-  position:absolute; inset:0; opacity:.2;
-  background-image:radial-gradient(circle,var(--border) 1px,transparent 1px);
-  background-size:28px 28px;
-  mask-image:radial-gradient(ellipse 70% 80% at 50% 0%,black 0%,transparent 70%);
-}
-.persona-hero-inner {
-  position:relative; z-index:1;
-  display:grid; grid-template-columns:1.1fr 1fr;
-  gap:clamp(32px,5vw,72px); align-items:center;
-}
-@media(max-width:920px){.persona-hero-inner{grid-template-columns:1fr;}}
-
-/* Hero entrance stagger */
-.hero-anim {
-  opacity:0;
-  animation: heroIn .8s cubic-bezier(.2,0,0,1) both;
-}
-
-.persona-eyebrow {
-  display:inline-flex; align-items:center; gap:10px;
-  font-family:var(--font-label); font-size:12px; letter-spacing:.14em;
-  text-transform:uppercase; color:var(--accent); font-weight:600; margin-bottom:18px;
-}
-.persona-eyebrow::before { content:""; width:28px; height:1px; background:currentColor; }
-.persona-h1 {
-  font-family:var(--font-display); font-weight:600;
-  font-size:clamp(40px,5.6vw,76px); line-height:1;
-  letter-spacing:-0.035em; margin:0 0 22px; text-wrap:balance; max-width:14ch;
-}
-.persona-h1 em { font-style:normal; color:var(--accent); }
-.persona-lede {
-  color:var(--fg-muted); font-size:clamp(17px,1.45vw,21px);
-  line-height:1.55; max-width:58ch; text-wrap:pretty; margin:0 0 28px;
-}
-.persona-cta-row { display:flex; gap:10px; flex-wrap:wrap; }
-
-/* Hero visual — floating cards */
-.persona-visual {
-  position:relative; aspect-ratio:4/5;
-  border-radius:var(--radius-lg);
-  background:radial-gradient(closest-side at 30% 30%,var(--accent-glow),transparent 70%),var(--bg-elevated);
-  border:1px solid var(--border); overflow:hidden;
-  box-shadow:0 40px 80px -40px color-mix(in oklab,var(--accent) 30%,transparent);
-}
-@media(max-width:920px){.persona-visual{aspect-ratio:16/11;}}
-
-.pv-card {
-  position:absolute; border:1px solid var(--border);
-  border-radius:var(--radius-md);
-  background:color-mix(in oklab,var(--bg) 88%,transparent);
-  backdrop-filter:blur(8px); padding:14px 16px;
-  box-shadow:0 12px 30px -10px rgba(0,0,0,.25);
-  opacity:0;
-}
-.float-card { opacity:0; }
-.float-card.pv-card-a { animation:heroIn .6s cubic-bezier(.2,0,0,1) both, floatCard 6s ease-in-out 1s infinite; animation-delay:400ms,1s; }
-.float-card.pv-card-b { animation:heroIn .6s cubic-bezier(.2,0,0,1) both, floatCard 7s ease-in-out 1.5s infinite; animation-delay:550ms,1.5s; }
-.float-card.pv-card-c { animation:heroIn .6s cubic-bezier(.2,0,0,1) both, floatCard 5.5s ease-in-out .5s infinite; animation-delay:700ms,.5s; }
-
-.pv-card-a{left:8%;top:12%;width:56%;}
-.pv-card-b{right:6%;top:38%;width:50%;}
-.pv-card-c{left:14%;bottom:8%;width:64%;}
-
-.pv-card .pv-h{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-subtle);margin-bottom:6px;}
-.pv-card .pv-t{font-family:var(--font-display);font-weight:600;font-size:14px;line-height:1.3;letter-spacing:-0.005em;color:var(--fg);margin:0 0 8px;}
-.pv-card .pv-cite{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10px;color:var(--accent);padding:3px 8px;border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);border-radius:999px;background:var(--accent-soft);}
-.pv-card .pv-bar{height:4px;border-radius:4px;background:var(--bg-sunken);margin-top:8px;overflow:hidden;}
-.pv-bar-fill{display:block;height:100%;background:var(--accent);width:0;border-radius:4px;animation:pvBarFill 1.2s cubic-bezier(.2,0,0,1) 1.4s forwards;}
-
-/* ══════════════════ EXPLAINED SECTION ══════════════════ */
-
-.persona-uses{padding:clamp(64px,8vw,112px) 0;}
-.persona-uses-h{font-family:var(--font-display);font-size:clamp(32px,4vw,52px);font-weight:600;letter-spacing:-0.03em;line-height:1.05;margin:0 0 18px;max-width:22ch;text-wrap:balance;}
-.persona-uses-lede{color:var(--fg-muted);font-size:clamp(16px,1.3vw,19px);line-height:1.55;max-width:60ch;margin:0 0 56px;}
-
-.use-row{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,5vw,72px);align-items:center;margin:clamp(48px,7vw,96px) 0;}
-.use-row.is-reversed{direction:rtl;}
-.use-row.is-reversed>*{direction:ltr;}
-@media(max-width:880px){.use-row,.use-row.is-reversed{grid-template-columns:1fr;direction:ltr;}}
-
-.use-step-num{display:inline-flex;align-items:center;gap:10px;font-family:var(--font-label);font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:600;margin-bottom:14px;}
-.use-step-num span{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border:1px solid color-mix(in oklab,var(--accent) 40%,transparent);background:var(--accent-soft);border-radius:999px;font-family:var(--font-display);font-size:12px;}
-.use-h{font-family:var(--font-display);font-size:clamp(26px,2.8vw,38px);font-weight:600;letter-spacing:-0.025em;line-height:1.1;margin:0 0 16px;text-wrap:balance;}
-.use-p{color:var(--fg-muted);font-size:16.5px;line-height:1.65;max-width:52ch;margin:0 0 22px;}
-.use-list{list-style:none;padding:0;margin:0 0 22px;display:flex;flex-direction:column;gap:10px;}
-.use-list li{display:flex;align-items:flex-start;gap:12px;font-size:15px;line-height:1.5;color:var(--fg);}
-.use-list li::before{content:"";flex-shrink:0;margin-top:7px;width:14px;height:14px;border-radius:50%;background:var(--accent-soft);border:1px solid color-mix(in oklab,var(--accent) 40%,transparent);}
-
-.use-visual--img{position:relative;aspect-ratio:5/4;border-radius:16px;border:1px dashed var(--border);background:var(--bg-elevated);overflow:hidden;
-  transition:transform .4s var(--ease),box-shadow .4s var(--ease);}
-.use-visual--img:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 24px 60px -20px color-mix(in oklab,var(--accent) 25%,transparent);}
-.use-visual--img.has-img{border-style:solid;border-color:var(--border);background:var(--bg);}
-.use-visual-img-real{border-radius:14px;}
-
-.img-slot-frame{position:absolute;inset:0;border-radius:16px;overflow:hidden;background:color-mix(in oklab,var(--bg) 60%,transparent);display:flex;align-items:center;justify-content:center;}
-.img-slot-ring{position:absolute;inset:0;border:1.5px dashed color-mix(in oklab,var(--fg) 22%,transparent);border-radius:16px;pointer-events:none;}
-.img-slot-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center;padding:12px;color:var(--fg-subtle);}
-.img-slot-empty svg{opacity:.4;}
-.img-slot-cap{font-size:13px;font-weight:500;color:var(--fg-subtle);letter-spacing:.01em;}
-
-/* ══════════════════ STEPS ══════════════════ */
-
-.persona-more{padding:clamp(64px,8vw,112px) 0;border-top:1px solid var(--border);}
-.persona-more-h{font-family:var(--font-display);font-size:clamp(26px,3vw,40px);font-weight:600;letter-spacing:-0.025em;margin:0 0 36px;text-wrap:balance;max-width:24ch;}
-.legal-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;}
-@media(max-width:920px){.legal-steps{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:540px){.legal-steps{grid-template-columns:1fr;}}
-
-.legal-step{position:relative;display:flex;flex-direction:column;gap:14px;padding:28px 26px;background:var(--bg-elevated);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;min-height:240px;
-  transition:border-color .3s var(--ease),transform .3s var(--ease),box-shadow .3s var(--ease);}
-.legal-step:hover{border-color:color-mix(in oklab,var(--accent) 50%,transparent);transform:translateY(-3px);box-shadow:0 16px 40px -16px color-mix(in oklab,var(--accent) 20%,transparent);}
-.legal-step::before{content:"";position:absolute;right:-40px;top:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(closest-side,var(--accent-glow),transparent 70%);opacity:.35;pointer-events:none;transition:opacity .3s;}
-.legal-step:hover::before{opacity:.7;}
-.legal-step-kicker{font-family:var(--font-label);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--fg-subtle);position:relative;}
-.legal-step-n{position:relative;display:inline-flex;align-items:baseline;gap:8px;font-family:var(--font-display);font-weight:600;font-size:48px;line-height:1;letter-spacing:-0.04em;color:var(--accent);}
-.legal-step h3{position:relative;font-family:var(--font-display);font-weight:600;font-size:19px;line-height:1.2;letter-spacing:-0.015em;margin:0;text-wrap:balance;}
-.legal-step p{position:relative;color:var(--fg-muted);font-size:14px;line-height:1.6;margin:0;flex:1;}
-
-/* ══════════════════ PROBLEMS & FEATURES ══════════════════ */
-
-.legal-problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 40px;}
-@media(max-width:760px){.legal-problem-grid{grid-template-columns:1fr;gap:0;}}
-.legal-problem{display:flex;gap:16px;align-items:flex-start;padding:22px 0;border-bottom:1px solid var(--border);
-  transition:background .2s;}
-.legal-problem:hover{background:var(--bg-elevated);padding-left:8px;border-radius:8px;}
-.legal-problem-ic{flex-shrink:0;width:38px;height:38px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--accent-soft);border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);color:var(--accent);font-size:17px;
-  transition:transform .25s var(--ease);}
-.legal-problem:hover .legal-problem-ic{transform:scale(1.15) rotate(-5deg);}
-.legal-problem h3{font-family:var(--font-display);font-weight:600;font-size:16px;letter-spacing:-0.01em;margin:2px 0 5px;}
-.legal-problem p{font-size:13.5px;color:var(--fg-muted);line-height:1.5;margin:0;}
-
-.cs-eyebrow-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:28px;gap:16px;flex-wrap:wrap;}
-.legal-feat-panel{border-top:1px solid var(--border);border-left:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-elevated);display:grid;grid-template-columns:1fr 1fr;}
-@media(max-width:760px){.legal-feat-panel{grid-template-columns:1fr;}}
-.legal-feat{display:flex;gap:16px;align-items:flex-start;padding:24px 26px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);
-  transition:background .25s;}
-.legal-feat:hover{background:var(--bg-sunken);}
-.legal-feat-ic{flex-shrink:0;width:36px;height:36px;border-radius:9px;display:inline-flex;align-items:center;justify-content:center;background:var(--bg-sunken);border:1px solid var(--border);color:var(--accent);font-size:16px;
-  transition:transform .25s var(--ease),background .25s;}
-.legal-feat:hover .legal-feat-ic{transform:scale(1.12) rotate(-4deg);background:var(--accent-soft);}
-.legal-feat h3{font-family:var(--font-display);font-weight:600;font-size:16px;letter-spacing:-0.01em;margin:2px 0 5px;}
-.legal-feat p{font-size:13px;color:var(--fg-muted);line-height:1.5;margin:0;}
-
-/* ══════════════════ BENEFITS ══════════════════ */
-
-.legal-benefit-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
-@media(max-width:760px){.legal-benefit-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:460px){.legal-benefit-grid{grid-template-columns:1fr;}}
-.legal-benefit{display:flex;align-items:center;gap:14px;padding:18px 20px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-elevated);font-family:var(--font-display);font-weight:600;font-size:15px;letter-spacing:-0.01em;
-  transition:border-color .25s var(--ease),transform .25s var(--ease),box-shadow .25s var(--ease);}
-.legal-benefit:hover{border-color:color-mix(in oklab,var(--accent) 50%,transparent);transform:translateY(-2px);box-shadow:0 8px 24px -8px color-mix(in oklab,var(--accent) 15%,transparent);}
-.legal-benefit .chk{flex-shrink:0;width:26px;height:26px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;background:var(--accent-soft);border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);color:var(--accent);
-  transition:transform .25s var(--ease);}
-.legal-benefit:hover .chk{transform:scale(1.2) rotate(10deg);}
-
-/* ══════════════════ QUOTE ══════════════════ */
-
-.persona-quote{position:relative;padding:clamp(64px,8vw,112px) 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:radial-gradient(closest-side at 0% 50%,var(--accent-glow),transparent 70%),var(--bg);}
-.persona-quote-inner{display:grid;grid-template-columns:1fr 1.4fr;gap:clamp(28px,5vw,72px);align-items:center;}
-@media(max-width:880px){.persona-quote-inner{grid-template-columns:1fr;}}
-.persona-quote-card{position:relative;aspect-ratio:1/1;border-radius:var(--radius-lg);background:repeating-linear-gradient(135deg,color-mix(in oklab,var(--accent) 12%,transparent) 0 14px,transparent 14px 30px),var(--bg-elevated);border:1px solid var(--border);overflow:hidden;display:flex;align-items:flex-end;padding:24px;
-  transition:transform .4s var(--ease),box-shadow .4s var(--ease);}
-.persona-quote-card:hover{transform:scale(1.02);box-shadow:0 32px 80px -24px color-mix(in oklab,var(--accent) 25%,transparent);}
-.persona-quote-card::before{content:'"';position:absolute;left:20px;top:-10px;font-family:var(--font-display);font-weight:600;font-size:200px;color:var(--accent);line-height:1;opacity:.2;}
-.persona-quote-card .name{font-family:var(--font-display);font-weight:600;font-size:20px;letter-spacing:-0.015em;color:var(--fg);}
-.persona-quote-card .role{font-size:13px;color:var(--fg-muted);margin-top:4px;}
-.persona-quote-card-inner{z-index:1;}
-.persona-quote-text q{display:block;font-family:var(--font-display);font-weight:600;font-size:clamp(22px,2.6vw,36px);line-height:1.25;letter-spacing:-0.025em;color:var(--fg);text-wrap:pretty;quotes:none;margin:0 0 28px;}
-.persona-quote-text q::before{content:'"';color:var(--accent);padding-right:4px;}
-.persona-quote-text q::after{content:'"';color:var(--accent);padding-left:4px;}
-.persona-quote-attr{font-family:var(--font-label);font-size:13px;letter-spacing:.04em;color:var(--fg-muted);text-transform:uppercase;}
-
-/* ══════════════════ STATS — count-up ══════════════════ */
-
-.persona-stats{padding:clamp(56px,7vw,96px) 0;}
-.persona-stats-h{font-family:var(--font-display);font-size:clamp(28px,3vw,42px);font-weight:600;letter-spacing:-0.025em;text-align:center;margin:0 auto 48px;max-width:22ch;text-wrap:balance;}
-.persona-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--bg-elevated);overflow:hidden;}
-@media(max-width:720px){.persona-stat-grid{grid-template-columns:repeat(2,1fr);}}
-.persona-stat-cell{padding:28px;border-right:1px solid var(--border);
-  transition:background .25s;}
-.persona-stat-cell:hover{background:var(--bg-sunken);}
-.persona-stat-cell:last-child{border-right:0;}
-@media(max-width:720px){.persona-stat-cell{border-right:1px solid var(--border);}.persona-stat-cell:nth-child(2n){border-right:0;}.persona-stat-cell:nth-child(1),.persona-stat-cell:nth-child(2){border-bottom:1px solid var(--border);}}
-.persona-stat-n{font-family:var(--font-display);font-weight:600;font-size:clamp(36px,4.4vw,56px);line-height:1;letter-spacing:-0.03em;color:var(--accent);font-variant-numeric:tabular-nums;}
-.persona-stat-l{font-size:13.5px;color:var(--fg-muted);line-height:1.45;margin-top:12px;}
-.persona-stat-source{font-family:var(--font-mono);font-size:10.5px;color:var(--fg-subtle);margin-top:8px;}
-
-/* ══════════════════ DISCOVER MORE ══════════════════ */
-
-.persona-more-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
-@media(max-width:880px){.persona-more-grid{grid-template-columns:repeat(2,1fr);}}
-@media(max-width:480px){.persona-more-grid{grid-template-columns:1fr;}}
-.persona-more-card{display:flex;flex-direction:column;gap:14px;padding:24px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--bg-elevated);text-decoration:none;color:inherit;position:relative;overflow:hidden;min-height:220px;
-  transition:border-color .3s var(--ease),transform .3s var(--ease),box-shadow .3s var(--ease);}
-.persona-more-card::after{content:"";position:absolute;right:-40px;bottom:-40px;width:140px;height:140px;border-radius:50%;background:radial-gradient(closest-side,var(--accent-glow),transparent 70%);opacity:0;transition:opacity .3s var(--ease);}
-.persona-more-card:hover{border-color:var(--accent);transform:translateY(-3px);opacity:1;box-shadow:0 16px 40px -16px color-mix(in oklab,var(--accent) 20%,transparent);}
-.persona-more-card:hover::after{opacity:.9;}
-.persona-more-icon{width:40px;height:40px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--accent-soft);border:1px solid color-mix(in oklab,var(--accent) 30%,transparent);color:var(--accent);font-family:var(--font-display);font-weight:600;font-size:17px;
-  transition:transform .3s var(--ease);}
-.persona-more-card:hover .persona-more-icon{transform:scale(1.12) rotate(-5deg);}
-.persona-more-h3{font-family:var(--font-display);font-size:18px;font-weight:600;letter-spacing:-0.015em;margin:0;}
-.persona-more-p{font-size:13.5px;color:var(--fg-muted);line-height:1.5;margin:0;flex:1;}
-.persona-more-link{font-family:var(--font-label);font-size:12.5px;font-weight:500;color:var(--accent);display:inline-flex;align-items:center;gap:6px;margin-top:auto;
-  transition:gap .2s var(--ease);}
-.persona-more-card:hover .persona-more-link{gap:10px;}
-
-/* ══════════════════ LOGO MARQUEE ══════════════════ */
-
-.logo-section { overflow:hidden; }
-.logo-marquee-track {
-  overflow:hidden;
-  mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
-  margin-top: 20px;
-}
-.logo-marquee {
-  display:flex; gap:0;
-  width:max-content;
-  animation: logoMarquee 32s linear infinite;
-}
-.logo-marquee:hover { animation-play-state:paused; }
-.logo-marquee-item {
-  padding:28px 40px;
-  display:flex; align-items:center; justify-content:center;
-  font-family:var(--font-display); font-weight:600;
-  font-size:18px; letter-spacing:-0.02em;
-  color:var(--fg-muted); white-space:nowrap;
-  border-right:1px solid var(--border);
-  transition:color .2s, background .2s;
-}
-.logo-marquee-item:hover{color:var(--fg);background:var(--bg-elevated);}
-
-.cs-section{padding:clamp(48px,6vw,80px) 0;}
-`

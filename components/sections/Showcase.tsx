@@ -1,217 +1,124 @@
-'use client'
+import type { ReactNode } from 'react'
 
-import { useState } from 'react'
-import { Icons } from '@/components/icons/Icons'
-import { Marks } from '@/components/connectors/Connectors'
-import { SHOWCASE_THREADS, SHOWCASE_SOURCES } from '@/lib/data'
+/* "Most enterprise AI waits for you to ask" — ported from the reference: a two
+   column layout with the pitch on the left and, on the right, a disabled ask
+   pill, a "Never asked" connector, and three accent cards of work that slips.
+   Exact reference icons; colors mapped to the site's tokens for light/dark. */
 
-interface TabDef {
-  id: string
-  label: string
-  icon: string
-}
-
-const TABS: TabDef[] = [
-  { id: 'ask',     label: 'Ask',     icon: 'spark'   },
-  { id: 'threads', label: 'Threads', icon: 'message' },
-  { id: 'sources', label: 'Sources', icon: 'layers'  },
+const NEVER_ASKED: { icon: ReactNode; text: string }[] = [
+  {
+    // file-text
+    icon: (
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" />
+        <path d="M9 13h6" /><path d="M9 17h4" />
+      </svg>
+    ),
+    text: 'The proposal you promised on Tuesday’s call',
+  },
+  {
+    // mail
+    icon: (
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="2" /><path d="m22 7-10 6L2 7" />
+      </svg>
+    ),
+    text: 'The client who stopped replying',
+  },
+  {
+    // clock
+    icon: (
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" />
+      </svg>
+    ),
+    text: 'The deal that hasn’t moved in three weeks',
+  },
 ]
 
-function ShowcaseAsk() {
-  return (
-    <div className="sc-grid">
-      <aside className="sc-side">
-        <div className="sc-side-head">Workspaces</div>
-        {(['Revenue', 'Customer Success', 'Engineering', 'Marketing'] as const).map((w, i) => (
-          <div key={w} className={`sc-side-row ${i === 0 ? 'is-active' : ''}`}>
-            <span className="sc-side-bullet" style={{ background: ['#E8A14A', '#5FD3A4', '#A992FF', '#71717A'][i] }} />
-            {w}
-          </div>
-        ))}
-        <div className="sc-side-head" style={{ marginTop: 18 }}>Recent threads</div>
-        {['Acme renewal — risks', 'Q3 launch decisions', 'Refund policy', 'Globex SOC 2'].map((t) => (
-          <div key={t} className="sc-side-row sc-side-row--sub">{t}</div>
-        ))}
-      </aside>
-      <div className="sc-main">
-        <div className="sc-q">
-          <div className="muted" style={{ fontSize: 12, marginBottom: 6 }}>You asked</div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, letterSpacing: '-.015em' }}>
-            What&apos;s blocking the Acme renewal?
-          </div>
-        </div>
-        <div className="sc-a">
-          <div className="ask-pill" style={{ marginBottom: 12 }}>
-            <Icons.spark size={12} /> Answer
-          </div>
-          <p style={{ fontSize: 15, lineHeight: 1.65, margin: 0 }}>
-            Two things. <mark className="cite">SSO must ship before signature<sup>1</sup></mark> — Lena
-            (Acme CTO) raised it on the May 5 QBR. And procurement is asking
-            for a <mark className="cite">12% volume discount<sup>2</sup></mark>, with Friday as the soft
-            deadline. Champion strength is high; the deal is not at risk if SSO
-            timeline lands by EOD Wednesday.
-          </p>
-          <div className="sc-sources">
-            <div className="sc-source"><span>1</span> Fathom · Acme QBR · May 5</div>
-            <div className="sc-source"><span>2</span> Gmail · Re: discount tiers</div>
-            <div className="sc-source"><span>3</span> Salesforce · Opp #44829</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function ShowcaseThreads() {
-  return (
-    <div className="sc-threads">
-      {SHOWCASE_THREADS.map((th, i) => (
-        <div key={i} className="sc-thread">
-          <div className="sc-thread-head">
-            <span className="sc-avatar" />
-            <span className="sc-who">{th.who}</span>
-            <span className="sc-time muted">{th.t}</span>
-          </div>
-          <div className="sc-thread-q">{th.q}</div>
-          <div className="sc-thread-meta">
-            <span className="chip">3 sources</span>
-            <span className="chip">Salesforce</span>
-            <span className="chip">Fathom</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function ShowcaseSourcesPanel() {
-  return (
-    <div className="sc-sources-grid">
-      {SHOWCASE_SOURCES.map((s) => (
-        <div key={s.name} className="sc-src-card">
-          <div className="sc-src-mark">{Marks[s.name]}</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: 15 }}>{s.name}</div>
-            <div className="muted" style={{ fontSize: 12, marginTop: 2 }}>
-              {s.count.toLocaleString()} items · {s.status}
-            </div>
-          </div>
-          <Icons.check size={14} style={{ color: 'var(--accent)' }} />
-        </div>
-      ))}
-    </div>
-  )
-}
-
 export default function Showcase() {
-  const [tab, setTab] = useState('ask')
-
   return (
     <>
       <style>{`
-        .showcase-head { max-width: 760px; margin-bottom: 48px; }
-        .showcase-frame { padding: 0; overflow: hidden; }
-        .showcase-tabs {
-          display: flex; align-items: center; gap: 4px;
-          padding: 12px 14px; border-bottom: 1px solid var(--border);
-          background: var(--bg);
+        .pro-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+          gap: clamp(48px, 7vw, 112px); align-items: center;
         }
-        .showcase-tab {
-          display: inline-flex; align-items: center; gap: 7px;
-          padding: 7px 12px; border-radius: 9999px;
-          background: transparent; border: 0;
-          font-family: var(--font-display); font-size: 13px; font-weight: 500;
-          color: var(--fg-subtle);
-          transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), transform .2s;
+        .pro-eyebrow {
+          font-family: var(--font-label); font-size: 13px; font-weight: 600;
+          letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); margin-bottom: 18px;
         }
-        .showcase-tab:hover { color: var(--fg); transform: translateY(-1px); }
-        .showcase-tab.is-active { background: var(--bg-elevated); color: var(--fg); border: 1px solid var(--border); }
-        .showcase-tab.is-active svg { color: var(--accent); }
-        .showcase-frame { transition: box-shadow .35s var(--ease); }
-        .showcase-frame:hover { box-shadow: 0 24px 60px -24px color-mix(in oklab,var(--accent) 18%,transparent); }
-        .showcase-body { min-height: 420px; }
+        .pro-h {
+          font-family: var(--font-display); font-weight: 700;
+          font-size: clamp(30px, 3.6vw, 46px); line-height: 1.04;
+          letter-spacing: -0.035em; color: var(--fg); margin-bottom: 28px; text-wrap: balance;
+        }
+        .pro-lede { font-size: clamp(16px, 1.45vw, 18px); line-height: 1.7; color: var(--fg-muted); max-width: 48ch; text-wrap: pretty; }
+        .pro-lede strong { color: var(--fg); font-weight: 500; }
 
-        .sc-grid { display: grid; grid-template-columns: 230px 1fr; min-height: 420px; }
-        @media (max-width: 800px) { .sc-grid { grid-template-columns: 1fr; } }
-        .sc-side { padding: 18px 12px; border-right: 1px solid var(--border); background: var(--bg); }
-        @media (max-width: 800px) { .sc-side { display: none; } }
-        .sc-side-head { font-family: var(--font-label); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg-subtle); padding: 4px 10px; }
-        .sc-side-row { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border-radius: 9px; font-size: 13.5px; color: var(--fg-muted); cursor: pointer; }
-        .sc-side-row:hover { background: var(--bg-elevated); color: var(--fg); }
-        .sc-side-row.is-active { background: var(--bg-elevated); color: var(--fg); }
-        .sc-side-row--sub { color: var(--fg-subtle); padding-left: 18px; }
-        .sc-side-bullet { width: 8px; height: 8px; border-radius: 2px; }
-        .sc-main { padding: 26px 30px; display: flex; flex-direction: column; gap: 22px; background: var(--bg-elevated); }
-        @media (max-width: 640px) {
-          .sc-main { padding: 16px; gap: 14px; }
-          .sc-q div[style] { font-size: 18px !important; }
-          .showcase-body { min-height: auto; }
-          .showcase-tabs { flex-wrap: wrap; }
+        .pro-ask {
+          display: flex; align-items: center; gap: 12px; height: 56px;
+          padding: 0 8px 0 18px; border-radius: 9999px;
+          border: 1px solid var(--border); background: var(--bg-elevated); opacity: 0.6;
         }
-        @media (max-width: 480px) {
-          .sc-main { padding: 12px; }
-          .sc-q, .sc-a { padding: 14px; }
+        .pro-ask-ph { flex: 1; font-size: 15px; color: var(--fg-subtle); }
+        .pro-ask-go { width: 40px; height: 40px; border-radius: 9999px; background: var(--bg-sunken); display: flex; align-items: center; justify-content: center; color: var(--fg-subtle); }
+        .pro-connect { display: flex; align-items: center; gap: 12px; padding: 18px 0 18px 26px; }
+        .pro-connect-line { width: 1px; height: 36px; border-left: 1px dashed color-mix(in oklab, var(--fg) 22%, transparent); }
+        .pro-connect-label { font-family: var(--font-label); font-size: 12.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg-subtle); }
+        .pro-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px; }
+        .pro-item {
+          display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-radius: 14px;
+          border: 1px solid color-mix(in oklab, var(--accent) 35%, transparent);
+          background: color-mix(in oklab, var(--accent) 6%, transparent);
+          transition: transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
         }
-        .sc-q, .sc-a { padding: 18px 20px; border-radius: var(--radius-md); border: 1px solid var(--border); background: var(--bg); }
-        .sc-sources { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); }
-        .sc-source { display: flex; gap: 10px; font-size: 12.5px; color: var(--fg-muted); }
-        .sc-source span { display: inline-flex; width: 18px; height: 18px; align-items: center; justify-content: center; border-radius: 4px; background: var(--accent-soft); color: var(--accent); font-size: 10px; font-weight: 700; }
-
-        .sc-threads { padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; background: var(--bg-elevated); }
-        @media (max-width: 800px) { .sc-threads { grid-template-columns: 1fr; } }
-        .sc-thread { padding: 14px 16px; border-radius: var(--radius-md); background: var(--bg); border: 1px solid var(--border); }
-        .sc-thread-head { display: flex; align-items: center; gap: 9px; }
-        .sc-avatar { width: 18px; height: 18px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), color-mix(in oklab, var(--accent) 50%, var(--neutral-400))); }
-        .sc-who { font-size: 12.5px; font-weight: 600; color: var(--fg); font-family: var(--font-display); }
-        .sc-time { font-size: 11.5px; margin-left: auto; }
-        .sc-thread-q { margin: 8px 0 10px; font-size: 14.5px; line-height: 1.45; color: var(--fg); }
-        .sc-thread-meta { display: flex; gap: 5px; flex-wrap: wrap; }
-
-        .sc-sources-grid { padding: 16px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; background: var(--bg-elevated); }
-        @media (max-width: 800px) { .sc-sources-grid { grid-template-columns: 1fr; } }
-        .sc-src-card { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: var(--radius-md); background: var(--bg); border: 1px solid var(--border); }
-        .sc-src-mark { width: 34px; height: 34px; border-radius: 8px; background: var(--bg-elevated); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--fg-muted); }
-        .sc-src-mark svg { width: 20px; height: 20px; }
-        .ask-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 9px; border-radius: 9999px; font-size: 11.5px; letter-spacing: .04em; background: var(--accent-soft); color: var(--accent); font-family: var(--font-label); font-weight: 600; }
+        .pro-item:hover { transform: translateX(3px); box-shadow: 0 14px 34px -22px var(--accent-glow); }
+        .pro-item-ic {
+          flex: none; width: 40px; height: 40px; border-radius: 10px;
+          display: flex; align-items: center; justify-content: center; color: var(--accent);
+          background: var(--bg); border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+        }
+        .pro-item-text { font-size: 16.5px; line-height: 1.45; color: var(--fg); }
       `}</style>
 
-      <section className="showcase">
-        <div className="container">
-          <div className="showcase-head" data-reveal="fade-up">
-            <span className="eyebrow">A closer look</span>
-            <h2 className="section-title">
-              One workspace.<br />Every system. Every answer.
-            </h2>
-            <p className="section-lede">
-              Genie isn&apos;t a wrapper around a chat model. It&apos;s a retrieval-first
-              workspace built so revenue, support and operations teams can answer
-              their own questions without pinging anyone.
+      <section className="proactive">
+        <div className="container pro-grid">
+          <div data-reveal="fade-up">
+            <div className="pro-eyebrow">Proactive intelligence</div>
+            <h2 className="pro-h">Most enterprise AI waits for you to ask</h2>
+            <p className="pro-lede">
+              Most enterprise AI platforms are built around a question box. They index your
+              company&apos;s knowledge and answer well once you know what to ask.{' '}
+              <strong>What slips is the work nobody thought to ask about:</strong>
             </p>
           </div>
 
-          <div className="showcase-frame card" data-reveal="fade-up" style={{'--reveal-delay':'80ms'} as any}>
-            <div className="showcase-tabs">
-              {TABS.map((t) => {
-                const Icon = Icons[t.icon]
-                return (
-                  <button
-                    key={t.id}
-                    className={`showcase-tab ${tab === t.id ? 'is-active' : ''}`}
-                    onClick={() => setTab(t.id)}
-                  >
-                    {Icon && <Icon size={14} />} {t.label}
-                  </button>
-                )
-              })}
-              <div style={{ flex: 1 }} />
-              <span className="chip">⌘ K</span>
+          <div data-reveal="fade-up" style={{ '--reveal-delay': '100ms' } as React.CSSProperties}>
+            <div className="pro-ask" aria-hidden="true">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ color: 'var(--fg-subtle)' }}>
+                <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" />
+              </svg>
+              <span className="pro-ask-ph">Ask a question…</span>
+              <span className="pro-ask-go">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="m12 5 7 7-7 7" /></svg>
+              </span>
             </div>
 
-            <div className="showcase-body">
-              {tab === 'ask'     && <ShowcaseAsk />}
-              {tab === 'threads' && <ShowcaseThreads />}
-              {tab === 'sources' && <ShowcaseSourcesPanel />}
+            <div className="pro-connect" aria-hidden="true">
+              <span className="pro-connect-line" />
+              <span className="pro-connect-label">Never asked</span>
             </div>
+
+            <ul className="pro-list">
+              {NEVER_ASKED.map((n) => (
+                <li key={n.text} className="pro-item">
+                  <span className="pro-item-ic" aria-hidden="true">{n.icon}</span>
+                  <span className="pro-item-text">{n.text}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>

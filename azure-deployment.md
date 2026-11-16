@@ -1,4 +1,4 @@
-# Azure Deployment Guide — askgenie.ai CMS
+# Azure Deployment Guide — askClarant.ai CMS
 
 ## Prerequisites
 
@@ -14,12 +14,12 @@
 
 ```bash
 # Create a resource group
-az group create --name askgenie-rg --location eastus
+az group create --name askClarant-rg --location eastus
 
 # Create Azure Database for PostgreSQL (Flexible Server)
 az postgres flexible-server create \
-  --name askgenie-postgres \
-  --resource-group askgenie-rg \
+  --name askClarant-postgres \
+  --resource-group askClarant-rg \
   --location eastus \
   --admin-user pgadmin \
   --admin-password "YourStrongPassword123!" \
@@ -29,9 +29,9 @@ az postgres flexible-server create \
 
 # Create the application database
 az postgres flexible-server db create \
-  --name askgenie_cms \
-  --resource-group askgenie-rg \
-  --server-name askgenie-postgres
+  --name askClarant_cms \
+  --resource-group askClarant-rg \
+  --server-name askClarant-postgres
 ```
 
 ### 2. Create App Service
@@ -39,16 +39,16 @@ az postgres flexible-server db create \
 ```bash
 # Create App Service Plan
 az appservice plan create \
-  --name askgenie-plan \
-  --resource-group askgenie-rg \
+  --name askClarant-plan \
+  --resource-group askClarant-rg \
   --sku B2 \
   --is-linux
 
 # Create the Web App
 az webapp create \
-  --name askgenie-cms \
-  --resource-group askgenie-rg \
-  --plan askgenie-plan \
+  --name askClarant-cms \
+  --resource-group askClarant-rg \
+  --plan askClarant-plan \
   --runtime "NODE:20-lts"
 ```
 
@@ -56,12 +56,12 @@ az webapp create \
 
 ```bash
 az webapp config appsettings set \
-  --name askgenie-cms \
-  --resource-group askgenie-rg \
+  --name askClarant-cms \
+  --resource-group askClarant-rg \
   --settings \
-    DATABASE_URL="postgresql://pgadmin:YourStrongPassword123!@askgenie-postgres.postgres.database.azure.com/askgenie_cms?sslmode=require" \
+    DATABASE_URL="postgresql://pgadmin:YourStrongPassword123!@askClarant-postgres.postgres.database.azure.com/askClarant_cms?sslmode=require" \
     AUTH_SECRET="$(openssl rand -base64 32)" \
-    NEXTAUTH_URL="https://askgenie-cms.azurewebsites.net" \
+    NEXTAUTH_URL="https://askClarant-cms.azurewebsites.net" \
     NODE_ENV="production"
 ```
 
@@ -75,8 +75,8 @@ npm run build
 zip -r deploy.zip . --exclude node_modules .next/cache
 
 az webapp deployment source config-zip \
-  --name askgenie-cms \
-  --resource-group askgenie-rg \
+  --name askClarant-cms \
+  --resource-group askClarant-rg \
   --src deploy.zip
 ```
 
@@ -84,7 +84,7 @@ az webapp deployment source config-zip \
 
 ```bash
 # SSH into the app service
-az webapp ssh --name askgenie-cms --resource-group askgenie-rg
+az webapp ssh --name askClarant-cms --resource-group askClarant-rg
 
 # Inside the container:
 npx prisma migrate deploy
@@ -120,10 +120,10 @@ CMD ["node", "server.js"]
 
 ```bash
 # Create Container Registry
-az acr create --name askgenieacr --resource-group askgenie-rg --sku Basic
+az acr create --name askClarantacr --resource-group askClarant-rg --sku Basic
 
 # Build and push
-az acr build --registry askgenieacr --image askgenie:latest .
+az acr build --registry askClarantacr --image askClarant:latest .
 ```
 
 ---
@@ -159,5 +159,5 @@ Add this step to your GitHub Actions or Azure DevOps pipeline:
 - [ ] `NEXTAUTH_URL` set to your app's URL
 - [ ] `npx prisma migrate deploy` ran successfully
 - [ ] `npx prisma db seed` ran to create initial admin user
-- [ ] Login at `/login` with `admin@askgenie.ai` / `Admin@1234`
+- [ ] Login at `/login` with `admin@askClarant.ai` / `Admin@1234`
 - [ ] **Change the admin password immediately in Settings**

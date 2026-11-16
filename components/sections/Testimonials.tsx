@@ -1,11 +1,56 @@
 import { Icons } from '@/components/icons/Icons'
 import { QUOTES, STATS } from '@/lib/data'
+import { prisma } from '@/lib/prisma'
 
-export default function Testimonials() {
+// Shape the section renders. Built from published testimonials in the DB,
+// falling back to the static QUOTES if none have been published yet.
+interface QuoteCard {
+  q: string
+  by: string
+  org: string
+  initials: string
+}
+
+function deriveInitials(name: string): string {
+  return name
+    .split(/\s+/)
+    .map((w) => w[0])
+    .filter(Boolean)
+    .slice(0, 2)
+    .join('')
+    .toUpperCase()
+}
+
+// Pull published testimonials (managed from the dashboard). Any DB failure
+// degrades gracefully to the static QUOTES rather than breaking the homepage.
+async function getQuotes(): Promise<QuoteCard[]> {
+  try {
+    const rows = await prisma.testimonial.findMany({
+      where: { status: 'published' },
+      orderBy: [{ order: 'asc' }, { createdat: 'desc' }],
+    })
+
+    if (rows.length === 0) return QUOTES
+
+    return rows.map((t) => ({
+      q: t.quote,
+      by: t.authorname,
+      org: [t.authorrole, t.company].filter(Boolean).join(' · '),
+      initials: t.initials || deriveInitials(t.authorname),
+    }))
+  } catch (error) {
+    console.error('[Testimonials] DB fetch failed, using static fallback', error)
+    return QUOTES
+  }
+}
+
+export default async function Testimonials() {
+  const quotes = await getQuotes()
+
   return (
     <>
       <style>{`
-        .testimonials-head { margin-bottom: 48px; max-width: 720px; }
+        .testimonials-head { margin-bottom: 48px;}
         .quotes-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
         @media (max-width: 1000px) { .quotes-grid { grid-template-columns: 1fr 1fr; } }
         @media (max-width: 640px) { .quotes-grid { grid-template-columns: 1fr; } }
@@ -61,7 +106,7 @@ export default function Testimonials() {
           </div>
 
           <div className="quotes-grid">
-            {QUOTES.map((q, i) => (
+            {quotes.map((q, i) => (
               <figure key={i} className="quote card" data-reveal="pop" style={{'--reveal-delay':`${i*80}ms`} as any}>
                 <div className="quote-stars" aria-hidden="true">
                   {[0, 1, 2, 3, 4].map((s) => <Icons.star key={s} size={13} />)}

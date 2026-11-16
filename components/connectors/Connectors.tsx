@@ -1,19 +1,5 @@
 import type { ReactNode } from 'react'
 
-interface MarkProps {
-  children: ReactNode
-  label?: string
-}
-
-const Mark = ({ children, label }: MarkProps) => (
-  <span
-    style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 24, height: 24 }}
-    aria-label={label}
-  >
-    {children}
-  </span>
-)
-
 export const Marks: Record<string, ReactNode> = {
   Gmail: (
     <svg viewBox="0 0 32 32" width={24} height={24}>

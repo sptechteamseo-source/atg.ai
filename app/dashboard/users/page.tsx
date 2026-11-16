@@ -18,6 +18,7 @@ export default async function UsersPage() {
       name: true,
       email: true,
       role: true,
+      status: true,
       createdat: true,
       _count: { select: { blogs: true, usecases: true } },
     },

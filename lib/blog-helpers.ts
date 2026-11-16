@@ -69,3 +69,21 @@ export function formatDateShort(dateStr: string | null | undefined): string {
   const d = new Date(dateStr)
   return `${MONTHS_SHORT[d.getUTCMonth()]} ${d.getUTCDate()}`
 }
+
+/**
+ * Optimize a Cloudinary delivery URL in place: modern format (f_auto → AVIF/WebP
+ * per browser), automatic quality (q_auto), and a width cap so the browser never
+ * downloads a multi-megabyte original. c_limit only ever downscales, so aspect
+ * ratio is preserved and small images are never upscaled/blurred.
+ *
+ * Blog images are served via raw <img> (Cloudinary-hosted), so they bypass
+ * next/image — this helper is how they get optimized. Non-Cloudinary or already
+ * transformed URLs are returned unchanged (idempotent).
+ */
+export function cldOptimize(url: string | null | undefined, width?: number): string {
+  if (!url) return ''
+  if (!url.includes('res.cloudinary.com/') || !url.includes('/upload/')) return url
+  if (/\/upload\/[^/]*(f_auto|q_auto)/.test(url)) return url // already optimized
+  const t = ['f_auto', 'q_auto', ...(width ? [`w_${width}`, 'c_limit'] : [])].join(',')
+  return url.replace('/upload/', `/upload/${t}/`)
+}

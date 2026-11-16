@@ -50,6 +50,9 @@ export const Filter:       FC<IconProps> = (p) => <Svg {...p}><path d="M22 3H2l8
 export const Twitter:      FC<IconProps> = (p) => <Svg {...p}><path d="M18 4h3l-7 8 8 10h-6l-5-6.5L5 22H2l7.5-8.5L2 4h6l4.5 6Z"/></Svg>
 export const Github:       FC<IconProps> = (p) => <Svg {...p}><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5a3 3 0 0 0-.9-2.3c3-.4 6.1-1.5 6.1-7a5.5 5.5 0 0 0-1.5-3.8 5 5 0 0 0-.1-3.8s-1.2-.4-4 1.5a13.4 13.4 0 0 0-7 0c-2.8-1.9-4-1.5-4-1.5A5 5 0 0 0 4 5.6a5.5 5.5 0 0 0-1.5 3.8c0 5.5 3 6.6 6 7-.6.6-.9 1.5-.9 2.3V22"/></Svg>
 export const Linkedin:     FC<IconProps> = (p) => <Svg {...p}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6Z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></Svg>
+export const Instagram:    FC<IconProps> = (p) => <Svg {...p}><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37Z"/><path d="M17.5 6.5h.01"/></Svg>
+export const Youtube:      FC<IconProps> = (p) => <Svg {...p}><path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17"/><path d="m10 15 5-3-5-3z"/></Svg>
+export const Pinterest:    FC<IconProps> = (p) => <Svg {...p}><circle cx="12" cy="12" r="10"/><path d="M8.5 20c-.4-1.6-.3-3.2.2-4.8.5-1.7 1-3.4 1-4.7a2.7 2.7 0 0 1 5.4.3c0 2.6-1.6 4.9-3.9 4.9a2.1 2.1 0 0 1-2.1-2.3"/></Svg>
 export const Play:         FC<IconProps> = (p) => <Svg {...p}><path d="m6 4 14 8-14 8z" fill="currentColor"/></Svg>
 export const Star:         FC<IconProps> = (p) => <Svg {...p}><path d="m12 2 3 7 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z" fill="currentColor"/></Svg>
 
@@ -81,6 +84,9 @@ export const Icons: Record<string, FC<IconProps>> = {
   twitter:      Twitter,
   github:       Github,
   linkedin:     Linkedin,
+  instagram:    Instagram,
+  youtube:      Youtube,
+  pinterest:    Pinterest,
   play:         Play,
   star:         Star,
 }

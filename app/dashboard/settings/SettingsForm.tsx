@@ -15,9 +15,9 @@ interface SettingsFormProps {
 export default function SettingsForm({ currentUser }: SettingsFormProps) {
   const router = useRouter()
   const [profileSuccess, setProfileSuccess] = useState(false)
-  const [passwordSuccess, setPasswordSuccess] = useState(false)
+  const [securitySuccess, setSecuritySuccess] = useState(false)
   const [profileError, setProfileError] = useState('')
-  const [passwordError, setPasswordError] = useState('')
+  const [securityError, setSecurityError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function updateProfile(e: React.FormEvent<HTMLFormElement>) {
@@ -49,36 +49,48 @@ export default function SettingsForm({ currentUser }: SettingsFormProps) {
     }
   }
 
-  async function updatePassword(e: React.FormEvent<HTMLFormElement>) {
+  async function updateSecurity(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setPasswordError('')
-    setPasswordSuccess(false)
+    setSecurityError('')
+    setSecuritySuccess(false)
 
-    const fd = new FormData(e.currentTarget)
+    const form = e.currentTarget
+    const fd = new FormData(form)
+    const currentPassword = fd.get('currentPassword') as string
+    const newUsername = (fd.get('newUsername') as string).trim()
     const newPassword = fd.get('newPassword') as string
     const confirmPassword = fd.get('confirmPassword') as string
 
-    if (newPassword !== confirmPassword) {
-      setPasswordError('Passwords do not match')
+    if (!newUsername && !newPassword) {
+      setSecurityError('Enter a new username or a new password')
+      return
+    }
+    if (newPassword && newPassword !== confirmPassword) {
+      setSecurityError('New passwords do not match')
       return
     }
 
     setLoading(true)
 
-    const res = await fetch('/api/users/profile', {
+    const res = await fetch('/api/users/security', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: currentUser.name, password: newPassword }),
+      body: JSON.stringify({
+        currentPassword,
+        ...(newUsername ? { newUsername } : {}),
+        ...(newPassword ? { newPassword } : {}),
+      }),
     })
 
     const data = await res.json()
     setLoading(false)
 
     if (!data.success) {
-      setPasswordError(data.error)
+      setSecurityError(data.error)
     } else {
-      setPasswordSuccess(true)
-      ;(e.target as HTMLFormElement).reset()
+      setSecuritySuccess(true)
+      form.reset()
+      router.refresh()
     }
   }
 
@@ -109,27 +121,40 @@ export default function SettingsForm({ currentUser }: SettingsFormProps) {
         </form>
       </div>
 
-      {/* Password change */}
+      {/* Account Security — change username and/or password (current password required) */}
       <div className="settings-card">
-        <h2 className="settings-section-title">Change Password</h2>
-        <p className="settings-section-desc">Choose a strong password of at least 8 characters.</p>
+        <h2 className="settings-section-title">Account Security</h2>
+        <p className="settings-section-desc">
+          Change your username or password. Your current password is required to confirm any change.
+        </p>
 
-        {passwordSuccess && <div className="alert alert--success">Password updated successfully.</div>}
-        {passwordError && <div className="alert alert--error">{passwordError}</div>}
+        {securitySuccess && <div className="alert alert--success">Account security updated successfully.</div>}
+        {securityError && <div className="alert alert--error">{securityError}</div>}
 
-        <form onSubmit={updatePassword} className="settings-form">
+        <form onSubmit={updateSecurity} className="settings-form">
+          <div className="form-field">
+            <label htmlFor="currentPassword">Current password</label>
+            <input id="currentPassword" name="currentPassword" type="password" required autoComplete="current-password" placeholder="Enter current password" />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="newUsername">New username</label>
+            <input id="newUsername" name="newUsername" type="text" minLength={2} defaultValue={currentUser.name} autoComplete="username" placeholder="Leave unchanged to keep current" />
+          </div>
+
           <div className="form-row">
             <div className="form-field">
               <label htmlFor="newPassword">New password</label>
-              <input id="newPassword" name="newPassword" type="password" minLength={8} required placeholder="Min 8 characters" />
+              <input id="newPassword" name="newPassword" type="password" minLength={8} autoComplete="new-password" placeholder="Min 8 characters (optional)" />
             </div>
             <div className="form-field">
-              <label htmlFor="confirmPassword">Confirm password</label>
-              <input id="confirmPassword" name="confirmPassword" type="password" minLength={8} required placeholder="Repeat new password" />
+              <label htmlFor="confirmPassword">Confirm new password</label>
+              <input id="confirmPassword" name="confirmPassword" type="password" minLength={8} autoComplete="new-password" placeholder="Repeat new password" />
             </div>
           </div>
+
           <button type="submit" className="btn btn-accent settings-submit" disabled={loading}>
-            {loading ? 'Updating…' : 'Update Password'}
+            {loading ? 'Saving…' : 'Update Account Security'}
           </button>
         </form>
       </div>
